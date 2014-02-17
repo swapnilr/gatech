@@ -15,6 +15,9 @@ gtthreads library.  A simple round-robin queue should be used.
 #include <ucontext.h>
 #include "steque.h"
 #include <errno.h>
+#include <signal.h>
+#include <sys/time.h>
+#include <string.h>
 /* 
    Students should define global variables and helper functions as
    they see fit.
@@ -26,7 +29,8 @@ typedef struct wrapper_input {
 } wrapper_input;
 
 static steque_t threads;
-
+static sigset_t vtalrm;
+static struct sigaction act;
 /*
  * If current thread is blocking something(on join, unblock it)
  * 
@@ -52,12 +56,21 @@ static void schedule() {
   }
 }
 
+static void alrm_handler(int sig) {
+  schedule();
+}
+
 static void wrapper(void *input) {
   wrapper_input* in = (wrapper_input *) input;
   void* retval = (*in->start_routine) (in->arg);
   gtthread_exit(retval);
 }
 
+static void addToQueue(gtthread_t thread) {
+  sigprocmask(SIG_BLOCK, &vtalrm, NULL);
+  steque_enqueue(&threads, (steque_item) thread);
+  sigprocmask(SIG_UNBLOCK, &vtalrm, NULL);
+}
 
 /*
   The gtthread_init() function does not have a corresponding pthread equivalent.
@@ -78,11 +91,30 @@ static void wrapper(void *input) {
  */
 void gtthread_init(long period){
   steque_init(&threads);
+
+  struct itimerval *T;
+  sigemptyset(&vtalrm);
+  sigaddset(&vtalrm, SIGVTALRM);
+  sigprocmask(SIG_UNBLOCK, &vtalrm, NULL);
+  T = (struct itimerval*) malloc(sizeof(struct itimerval));
+  T->it_value.tv_sec = T->it_interval.tv_sec = 0;
+  T->it_value.tv_usec = T->it_interval.tv_usec = period;
+
+  setitimer(ITIMER_VIRTUAL, T, NULL);
+
+  memset (&act, '\0', sizeof(act));
+  act.sa_handler = &alrm_handler;
+  if (sigaction(SIGVTALRM, &act, NULL) < 0) {
+    perror ("sigaction");
+    return;
+  }
+
+
   gtthread_t main_thread = (gtthread_t) malloc(sizeof(__gtthread_t));
   /*
      TODO: In the presence of signals, protect steque operations
    */
-  steque_enqueue(&threads, (steque_item) main_thread);
+  addToQueue(main_thread);
   
 }
 
@@ -113,7 +145,7 @@ int gtthread_create(gtthread_t *thread,
   input->start_routine = start_routine;
   input->arg = arg;
   makecontext(&(new_thread->context), (void (*)(void))wrapper, 1, input);
-  steque_enqueue(&threads, (steque_item) new_thread);
+  addToQueue(new_thread);
   *thread = new_thread;
   return 0;
 }
