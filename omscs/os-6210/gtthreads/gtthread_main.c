@@ -13,11 +13,9 @@ void *thr1(void *in) {
 
 int main() {
   gtthread_t t1;
-
   gtthread_init(0);
   gtthread_create( &t1, thr1, NULL);
-
   gtthread_yield();
-
+  gtthread_join(t1, NULL);
   return EXIT_SUCCESS;
 }
