@@ -5,6 +5,8 @@
 #include <ucontext.h>
 
 /* Define gtthread_t and gtthread_mutex_t types here */
+typedef int *gtthread_t;
+typedef int gtthread_mutex_t;
 
 void gtthread_init(long period);
 int  gtthread_create(gtthread_t *thread,

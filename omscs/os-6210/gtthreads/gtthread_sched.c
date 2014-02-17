@@ -9,7 +9,7 @@ gtthreads library.  A simple round-robin queue should be used.
 */
 
 #include "gtthread.h"
-
+#include <unistd.h>
 /* 
    Students should define global variables and helper functions as
    they see fit.
@@ -51,6 +51,7 @@ int gtthread_create(gtthread_t *thread,
 		    void *(*start_routine)(void *),
 		    void *arg){
 
+  return 0;
 }
 
 /*
@@ -60,6 +61,7 @@ int gtthread_create(gtthread_t *thread,
 int gtthread_join(gtthread_t thread, void **status){
 
 
+  return 0;
 }
 
 /*
@@ -89,6 +91,7 @@ void gtthread_yield(void){
 int  gtthread_equal(gtthread_t t1, gtthread_t t2){
 
 
+  return 0;
 }
 
 /*
@@ -97,6 +100,7 @@ int  gtthread_equal(gtthread_t t1, gtthread_t t2){
  */
 int  gtthread_cancel(gtthread_t thread){
 
+  return 0;
 }
 
 /*
@@ -104,4 +108,5 @@ int  gtthread_cancel(gtthread_t thread){
  */
 gtthread_t gtthread_self(void){
 
+  return (gtthread_t) NULL;
 }
