@@ -28,8 +28,9 @@ void pickup_one_chopstick(int stick_id, int phil_id){
     fflush(stdout)
   */
   /*Your code here*/
-
-
+  pthread_mutex_lock(&(chopstick_mutex[stick_id]));
+  printf("Philosopher %d picks up chopstick %d \n", phil_id, stick_id);
+  fflush(stdout);
 
 }
 void putdown_one_chopstick(int stick_id, int phil_id){
@@ -44,7 +45,9 @@ void putdown_one_chopstick(int stick_id, int phil_id){
     fflush(stdout)
   */
   /*Your code here*/
-  
+  printf("Philosopher %d puts down chopstick %d \n", phil_id, stick_id);
+  fflush(stdout);
+  pthread_mutex_unlock(&(chopstick_mutex[stick_id]));
 
 
 }
@@ -61,9 +64,15 @@ void pickup_chopsticks(int phil_id){
   */
   
   /*Your code here*/
-
-
-
+  int rStick = phil_to_chopstick(phil_id, right);
+  int lStick = phil_to_chopstick(phil_id, left);
+  if(rStick < lStick) {
+    pickup_one_chopstick(phil_to_chopstick(phil_id, right), phil_id);
+    pickup_one_chopstick(phil_to_chopstick(phil_id, left), phil_id);
+  } else {
+    pickup_one_chopstick(phil_to_chopstick(phil_id, left), phil_id);
+    pickup_one_chopstick(phil_to_chopstick(phil_id, right), phil_id);
+  }
 
 }
 
@@ -71,6 +80,8 @@ void putdown_chopsticks(int phil_id){
   /*Use putdown_chopstick to put down the chopsticks*/    
   /*Your code here*/
 
+  putdown_one_chopstick(phil_to_chopstick(phil_id, right), phil_id);
+  putdown_one_chopstick(phil_to_chopstick(phil_id, left), phil_id);
 
 
 }
