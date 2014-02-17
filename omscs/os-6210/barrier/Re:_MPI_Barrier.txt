@@ -1,0 +1,17 @@
+Dear Colleague,
+
+As you may already know, I am overseeing the development of a new
+parallel programming library for distributed machines called gtmpi.
+I asked one of my developers to implement several barrier
+synchronization and run some experiments to help us decide which to
+adopt.  The results were a little surprising to me, and I was hoping
+that I could get your to share your thoughts on them.
+
+In summary, we compared the algorithms presented in the famous
+Mellor-Crummey Scott paper by measuring how long it took for a given
+number of threads to cross 10^5 barriers. All experiments were run on
+a dedicated cluster with one process assigned to each node. 
+
+Details individual nodes are attached along with the data from the experiments.
+
+Looking forward to your insight!

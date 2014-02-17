@@ -1,0 +1,4 @@
+Each node is networked with 1Gbps Ethernet connections and
+interconnected with QDR Infiniband.  For communications between the
+nodes, there is no Ethernet routing since they are all on the same
+subnet.  The Infiniband network is also flat.
