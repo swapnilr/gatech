@@ -8,6 +8,7 @@
 typedef enum {READY, WAITING, CANCELED, FINISHED} state_t;
 typedef struct __gtthread_t __gtthread_t;
 typedef __gtthread_t* gtthread_t;
+typedef enum {UNLOCKED, LOCKED} gtthread_mutex_t;
 typedef struct __gtthread_t {
   gtthread_t parent;
   ucontext_t context;
@@ -16,9 +17,9 @@ typedef struct __gtthread_t {
   gtthread_t joining_on;
   void *retval;
   int children;  
+  steque_t locks;
+  gtthread_mutex_t* waiting_on;
 } __gtthread_t;
-
-typedef int gtthread_mutex_t;
 
 void gtthread_init(long period);
 int  gtthread_create(gtthread_t *thread,

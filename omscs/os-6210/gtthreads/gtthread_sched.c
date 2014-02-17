@@ -45,6 +45,12 @@ static void schedule() {
       steque_pop(&threads);
       continue;
     }
+    if(gtthread_self()->state == WAITING && gtthread_self()->waiting_on) {
+      if(*(gtthread_self()->waiting_on) == UNLOCKED) {
+        gtthread_self()->state = READY;
+        break;
+      }
+    }
     if(gtthread_self()->children == 0) {
       gtthread_self()->state = READY;
       break;
@@ -114,6 +120,7 @@ void gtthread_init(long period){
   /*
      TODO: In the presence of signals, protect steque operations
    */
+  steque_init(&(main_thread->locks));
   addToQueue(main_thread);
   
 }
@@ -145,6 +152,7 @@ int gtthread_create(gtthread_t *thread,
   input->start_routine = start_routine;
   input->arg = arg;
   makecontext(&(new_thread->context), (void (*)(void))wrapper, 1, input);
+  steque_init(&(new_thread->locks));
   addToQueue(new_thread);
   *thread = new_thread;
   return 0;
@@ -240,6 +248,10 @@ int  gtthread_cancel(gtthread_t thread){
   }
   if (thread->joiner != NULL) {
     thread->joiner->state = READY;
+  }
+  while(!steque_isempty(&(thread->locks))) {
+    gtthread_mutex_t* lock = (gtthread_mutex_t *) steque_pop(&(thread->locks));
+    gtthread_mutex_unlock(lock);
   }
   //printf("Reaching the end?\n");
   return 0;
