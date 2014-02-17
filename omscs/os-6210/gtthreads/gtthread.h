@@ -5,7 +5,7 @@
 #include <ucontext.h>
 
 /* Define gtthread_t and gtthread_mutex_t types here */
-typedef enum {WAITING, READY, CANCELED, FINISHED} state_t;
+typedef enum {READY, WAITING, CANCELED, FINISHED} state_t;
 typedef struct __gtthread_t __gtthread_t;
 typedef __gtthread_t* gtthread_t;
 typedef struct __gtthread_t {

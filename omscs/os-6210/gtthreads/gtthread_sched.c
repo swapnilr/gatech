@@ -34,16 +34,22 @@ static steque_t threads;
 static void schedule() {
   gtthread_t current = gtthread_self();
   steque_cycle(&threads);
-  while(gtthread_self()->state == WAITING) {
+  while(!steque_isempty(&threads) && gtthread_self()->state != READY) {
     // If joining on something, check if finished?
     // If children == 0 move to READY and schedule it
+    if(gtthread_self()->state == CANCELED || gtthread_self()->state == FINISHED) {
+      steque_pop(&threads);
+      continue;
+    }
     if(gtthread_self()->children == 0) {
       gtthread_self()->state = READY;
       break;
     }
     steque_cycle(&threads);
   }
-  swapcontext(&(current->context),&(gtthread_self()->context));
+  if(!steque_isempty(&threads)) {
+    swapcontext(&(current->context),&(gtthread_self()->context));
+  }
 }
 
 static void wrapper(void *input) {
@@ -152,15 +158,16 @@ void gtthread_exit(void* retval){
   // Cycle and keep on list? Move to finished list?
   gtthread_t current = gtthread_self();
   current->retval = retval;
-  current->parent->children--;
+  if (current->parent != NULL) {
+    current->parent->children--;
+  }
   // Notify any thread joining on self
   if (current->joiner != NULL) {
     current->joiner->state = READY;
   }
   if (current->children == 0) {
     current->state = FINISHED;
-    steque_pop(&threads);
-    setcontext(&(gtthread_self()->context));
+    schedule();
   } else {
     current->state = WAITING;
     // Go to scheduler -> Cycle
@@ -193,10 +200,16 @@ int  gtthread_equal(gtthread_t t1, gtthread_t t2){
   allowing one thread to terminate another asynchronously.
  */
 int  gtthread_cancel(gtthread_t thread){ 
-  gtthread_t current = gtthread_self();
-  current->state = CANCELED;
-  current->retval = NULL;
-  current->parent->children--;
+  //gtthread_t current = gtthread_self();
+  if(thread->state != FINISHED && thread->state != CANCELED) {
+    thread->state = CANCELED;
+    thread->retval = NULL;
+    thread->parent->children--;
+  }
+  if (thread->joiner != NULL) {
+    thread->joiner->state = READY;
+  }
+  //printf("Reaching the end?\n");
   return 0;
 }
 
@@ -207,3 +220,4 @@ int  gtthread_cancel(gtthread_t thread){
 gtthread_t gtthread_self(void){
   return (gtthread_t) steque_front(&threads);
 }
+
