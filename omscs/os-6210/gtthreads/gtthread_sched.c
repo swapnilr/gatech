@@ -69,6 +69,7 @@ static void alrm_handler(int sig) {
 static void wrapper(void *input) {
   wrapper_input* in = (wrapper_input *) input;
   void* retval = (*in->start_routine) (in->arg);
+  free(in);
   gtthread_exit(retval);
 }
 
@@ -183,6 +184,7 @@ int gtthread_join(gtthread_t thread, void **status){
     }
   }
   // TODO: More to be done once you return from this? When done waiting?
+  free(thread);
   return 0;
 }
 
@@ -202,6 +204,7 @@ void gtthread_exit(void* retval){
     current->parent->children--;
   }
   // Notify any thread joining on self
+  free(current->context.uc_stack.ss_sp);
   if (current->joiner != NULL) {
     current->joiner->state = READY;
   }
@@ -246,6 +249,7 @@ int  gtthread_cancel(gtthread_t thread){
     thread->retval = NULL;
     thread->parent->children--;
   }
+  free(thread->context.uc_stack.ss_sp);
   if (thread->joiner != NULL) {
     thread->joiner->state = READY;
   }
