@@ -250,7 +250,7 @@ int  gtthread_cancel(gtthread_t thread){
     thread->joiner->state = READY;
   }
   while(!steque_isempty(&(thread->locks))) {
-    gtthread_mutex_t* lock = (gtthread_mutex_t *) steque_pop(&(thread->locks));
+    gtthread_mutex_t* lock = (gtthread_mutex_t *) steque_front(&(thread->locks));
     gtthread_mutex_unlock(lock);
   }
   //printf("Reaching the end?\n");
