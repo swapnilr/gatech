@@ -43,14 +43,103 @@
 	    sense := not sense
 */
 
-void gtmp_init(int num_threads){
+typedef enum { false, true } bool;
 
+typedef struct treenode {
+  bool parentsense;
+  bool *parentpointer;
+  bool *childpointers[2];
+  bool havechild[4];
+  bool childnotready[4];
+  bool dummy;
+} treenode;
+
+static treenode *nodes;
+static bool *senses;
+static int P;
+
+void printitall() {
+  int i;
+  for(i=0; i<2; i++) {
+    printf("NODE %d\n", i);
+    printf("Havechild: ");
+    int j;
+    for(j=0; j<4; j++) {
+      printf("%d ", nodes[i].havechild[j]);
+    }
+    printf("\n");
+    printf("Childnotready: ");
+    for(j=0; j<4; j++){
+      printf("%d ", nodes[i].childnotready[j]);
+    }
+    printf("\n");
+  }
+}
+
+void gtmp_init(int num_threads){
+  P = num_threads;
+  nodes = (treenode *) malloc(sizeof(treenode) * num_threads);
+  senses = (bool *) malloc(sizeof(bool) * num_threads);
+  int i;
+  for(i=0; i<num_threads; i++){
+    nodes[i].parentsense = false;
+    int j;
+    for(j=0; j<4; j++){
+      if(((4*i) + j) < num_threads - 1) {
+        nodes[i].havechild[j] = true;
+      } else {
+        nodes[i].havechild[j] = false;
+      }
+    }
+    for(j=0; j<4; j++){
+      nodes[i].childnotready[j] = nodes[i].havechild[j];
+    }
+    if(i==0) {
+      nodes[i].parentpointer = &(nodes[i].dummy);
+    } else {
+      nodes[i].parentpointer = &(nodes[(int)((i-1)/4)].childnotready[(i-1) % 4]);
+    }
+    if(2*i + 1 >= num_threads) {
+      nodes[i].childpointers[0] = &(nodes[i].dummy);
+    } else {
+      nodes[i].childpointers[0] = &(nodes[2*i + 1].parentsense);
+    }
+    if(2*i + 2 >= num_threads) {
+      nodes[i].childpointers[1] = &(nodes[i].dummy);
+    } else {
+      nodes[i].childpointers[1] = &(nodes[2*i + 2].parentsense);
+    }
+  }
+  for(i=0; i<num_threads; i++){
+    senses[i] = true;
+  }
+  //printitall();
 }
 
 void gtmp_barrier(){
-
+  int vpid = omp_get_thread_num();
+  while(nodes[vpid].childnotready[0] || nodes[vpid].childnotready[1] ||
+     nodes[vpid].childnotready[2] || nodes[vpid].childnotready[3]) {
+    // Gotta wait yo
+  }
+  //printf("Thread %d done waiting for children\n", vpid);
+  int j;
+  for(j=0; j<4; j++){
+    nodes[vpid].childnotready[j] = nodes[vpid].havechild[j];
+  }
+  *(nodes[vpid].parentpointer) = false;
+  if(vpid != 0) {
+    while(senses[vpid] != nodes[vpid].parentsense) {
+      // Just hanging out
+    }
+  }
+  *(nodes[vpid].childpointers[0]) = senses[vpid];
+  *(nodes[vpid].childpointers[1]) = senses[vpid];
+  senses[vpid] = !(senses[vpid]);
+  //printitall();
 }
 
 void gtmp_finalize(){
-
+  free(nodes);
+  free(senses);
 }
