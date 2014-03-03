@@ -60,12 +60,95 @@
 	sense := not sense
 */
 
+static int P;
+
+int pow(int base, int exponent) {
+  int power = 1;
+  while(exponent > 0) {
+    power = power * base;
+    exponent = exponent - 1;
+  }
+  return power;
+}
+
+int log(int v) {
+  int r = 0; // r will be lg(v)
+  while (v >>= 1) // unroll for more speed...
+  {
+    r++;
+  }
+  return r;
+}
+
+int ceil_log(int ans) {
+  int lg = log(ans);
+  if(pow(2, lg) < ans) {
+    return lg + 1;
+  }
+  return lg;
+}
+
+/*
+  if 1,3,5,7... -> 1 round
+  if 2,6,10,12... -> 2 rounds
+  if 4,8,16... -> 3 rounds
+  up to a max of ceil(log(vpid))
+*/
+int getRounds(int vpid) {
+  int max_rounds = ceil_log(P);
+  int rounds; 
+  for(rounds=1; rounds <= max_rounds; rounds++) {
+    if(vpid % pow(2, rounds) != 0){
+      return rounds;
+    }
+  }
+  return max_rounds;
+}
 
 void gtmpi_init(int num_threads){
+ P = num_threads;  
+}
 
+void runRound(int vpid, int rounds, int currentRound) {
+  if(currentRound == ceil_log(P)) {
+    return;
+  }
+  //int currentRound = ceil_log(P) - rounds;
+  //Pick role - winner or loser
+  MPI_Status temp;
+  if(vpid % pow(2, currentRound + 1) == 0) {
+   // Lucky you
+    //printf("DEBUG: WINNER: Processor %d is the winner of round %d\n", vpid, currentRound);
+    int peer = vpid + pow(2, currentRound);
+    if(peer < P) {
+      //printf("DEBUG: WINNER: Processor %d waiting for message from %d\n", vpid, peer);
+      MPI_Recv(NULL, 0, MPI_INT, peer, 1, MPI_COMM_WORLD, &temp);
+      //printf("DEBUG: WINNER: Processor %d got the message from %d\n", vpid, peer);
+   }
+   runRound(vpid, rounds, currentRound + 1);
+   if(peer < P) {
+      MPI_Send(NULL, 0, MPI_INT, peer, 1, MPI_COMM_WORLD);
+   }
+  } else {
+    // You lost! First send a message and then wait for receipt
+    int peer = vpid - pow(2, currentRound);
+    //printf("DEBUG: LOSER: Sending message from %d to %d in round %d\n", vpid, peer, currentRound);
+    if(peer >= 0) {
+      MPI_Send(NULL, 0, MPI_INT, peer, 1, MPI_COMM_WORLD);
+      MPI_Recv(NULL, 0, MPI_INT, peer, 1, MPI_COMM_WORLD, &temp);
+    }
+  }
 }
 
 void gtmpi_barrier(){
+  int vpid;
+
+  MPI_Comm_rank(MPI_COMM_WORLD, &vpid);
+
+  // Determine number of rounds for this process
+  int rounds = getRounds(vpid);
+  //printf("DEBUG: Running %d rounds for %d\n", rounds, vpid);
+  runRound(vpid, rounds, 0);
 }
 
 void gtmpi_finalize(){
