@@ -7,12 +7,12 @@ CC = gcc
 MPICH = /usr/lib64/openmpi/1.4-gcc
 MPIFLAGS = -g -Wall -I$(MPICH)/include
 MPILIBS =
-MPICC = /opt/openmpi-1.4.3-gcc44/bin/mpicc
+MPICC = /usr/bin/mpicc #/opt/openmpi-1.4.3-gcc44/bin/mpicc
 
 hello_openmp: hello_openmp.c gtmp_mcs.c
 	$(CC) $(OMPFLAGS) -o $@ $^ $(OMPLIBS)
 
-hello_mpi: hello_mpi.c
+hello_mpi: hello_mpi.c gtmpi_dissemination.c 
 	$(MPICC) $(MPIFLAGS) -o $@ $^ $(MPILIBS)
 
 clean:

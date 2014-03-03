@@ -2,7 +2,6 @@
 #include <stdio.h>
 #include <mpi.h>
 #include "gtmpi.h"
-
 /*
     From the MCS Paper: The scalable, distributed dissemination barrier with only local spinning.
 
@@ -32,13 +31,57 @@
 	parity := 1 - parity
 */
 
+static int P;
+
+int pow(base, exponent) {
+  int power = 1;
+  while(exponent > 0) {
+    power = power * base;
+    exponent = exponent - 1;
+  }
+  return power;
+}
+
+int log(int v) {
+  int r = 0; // r will be lg(v)
+  while (v >>= 1) // unroll for more speed...
+  {
+    r++;
+  }
+  return r;
+}
+
+int ceil_log(int ans) {
+  int lg = log(ans);
+  if(pow(2, lg) < ans) {
+    return lg + 1;
+  }
+  return lg;
+}
 
 void gtmpi_init(int num_threads){
-
+  P = num_threads;
 }
 
 void gtmpi_barrier(){
+  int vpid, i;
 
+  MPI_Comm_rank(MPI_COMM_WORLD, &vpid);
+
+  int rounds = ceil_log(P);
+
+  for(i=0; i<rounds; i++) {
+    int dest = (vpid + pow(2,i)) % P;
+    //printf("dest = %d, coming from source = %d, %d\n", dest, vpid, P);
+    MPI_Send(NULL, 0, MPI_INT, dest, 1, MPI_COMM_WORLD);
+    MPI_Status temp;
+    int source = vpid - pow(2,i);
+    while(source < 0) {
+      source = (source + P) % P;
+    }
+    MPI_Recv(NULL, 0, MPI_INT, source, 1, MPI_COMM_WORLD, &temp);
+  }
+  
 }
 
 void gtmpi_finalize(){
