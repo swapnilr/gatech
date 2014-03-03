@@ -20,35 +20,36 @@
 */
 
 
-static MPI_Status* status_array;
 static int P;
 
 void gtmpi_init(int num_threads){
   P = num_threads;
-  send_request_array = (MPI_Request*) malloc((P - 1) * sizeof(MPI_Request));
-  recv_request_array = (MPI_Request*) malloc((P - 1) * sizeof(MPI_Request));
-  status_array = (MPI_Status*) malloc((P - 1) * sizeof(MPI_Status));
 }
 
+
+/*
+ * The logic is quite simple. While initially every single processor was notifying every other processor,
+   instead we leave the counting to one "master" processor, processor 0. So every other processor first sends a message to processor 0.
+   Then processor 0 notifies every other processor that the barrier is complete.
+ */
 void gtmpi_barrier(){
   int vpid, i;
 
   MPI_Comm_rank(MPI_COMM_WORLD, &vpid);
-  
-  for(i = 0; i < vpid; i++)
-    MPI_Send(NULL, 0, MPI_INT, i, 1, MPI_COMM_WORLD);
-  for(i = vpid + 1; i < P; i++)
-    MPI_Send(NULL, 0, MPI_INT, i, 1, MPI_COMM_WORLD);
-
-  for(i = 0; i < vpid; i++)
-    MPI_Recv(NULL, 0, MPI_INT, i, 1, MPI_COMM_WORLD, &status_array[i]);
-  for(i = vpid + 1; i < P; i++)
-    MPI_Recv(NULL, 0, MPI_INT, i, 1, MPI_COMM_WORLD, &status_array[i-1]);
+  MPI_Status temp;
+  if(vpid != 0) {
+    MPI_Send(NULL, 0, MPI_INT, 0, 1, MPI_COMM_WORLD);
+    MPI_Recv(NULL, 0, MPI_INT, 0, 1, MPI_COMM_WORLD, &temp);
+  } else {
+    for(i=1; i<P; i++) {
+      MPI_Recv(NULL, 0, MPI_INT, i, 1, MPI_COMM_WORLD, &temp);
+    }
+    for(i=1; i<P; i++) {
+      MPI_Send(NULL, 0, MPI_INT, i, 1, MPI_COMM_WORLD);
+    }
+  }
 }
 
 void gtmpi_finalize(){
-  if(status_array != NULL){
-    free(status_array);
-  }
 }
 
