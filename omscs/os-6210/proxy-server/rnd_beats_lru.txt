@@ -1,0 +1,9 @@
+#Enter one url per line below to create a web request pattern.  Once
+# the end of the list has been reached the simulations will start back
+# from the beginning.
+#
+#A list of usable urls is in the webdata.txt file
+#
+#The random replacement policy should outperform lru on a majority of
+# the cache sizes tested.
+
