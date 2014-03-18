@@ -15,7 +15,7 @@
 
 
 
-int gtcache_init(size_t min_entry_size, int num_levels, size_t capacity){
+int gtcache_init(size_t capacity, size_t min_entry_size, int num_levels){
 
 
 }

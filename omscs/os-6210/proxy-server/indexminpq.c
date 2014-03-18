@@ -219,7 +219,7 @@ void indexminpq_delete(indexminpq_t *this, int i) {
 
   index = this->qp[i];
   exch(this, index, this->N);
-  this->N++;
+  this->N--;
   swim(this, index);
   sink(this, index);
   this->qp[i] = -1;
