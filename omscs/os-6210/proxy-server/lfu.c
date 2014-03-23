@@ -76,7 +76,7 @@ int gtcache_init(size_t capacity, size_t min_entry_size, int num_levels){
 void* gtcache_get(char *key, size_t *val_size){
   //printf("Get called %s %d\n", key, hashtable->N);
   cache_entry_t *savedVal = (cache_entry_t *) hshtbl_get(hashtable, key);
-  if(savedVal){
+  if(savedVal && strcmp(savedVal->key, key) == 0){
     ////printf("Entry key %s at %lu\n", savedVal->key, (long) savedVal);
     ////printf("%d\n",savedVal->id);
     void *retVal = malloc(savedVal->val_size);
