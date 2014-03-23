@@ -4,3 +4,8 @@
  *
  * Your RPCL code here.
 */
+program HTTPGETPROG {
+     version HTTPGETVERS {
+        string HTTPGET(string) = 1;
+ 	 } = 1;
+} = 0x20000001;

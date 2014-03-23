@@ -29,16 +29,16 @@ proxy: proxy.c proxy_rpc_svc.c proxy_rpc.h
 perform: rnd_perform lfu_perform lru_perform lrumin_perform
 
 rnd_perform: cache_perform.c rnd.c $(GENERICS) fake_www.c
-	$(CC) -o $@ $(CFLAGS) $^ $(LIBS)
+	$(CC) -o $@ $(CFLAGS) $^ $(LIBS) -lm
 
 lfu_perform: cache_perform.c lfu.c $(GENERICS) fake_www.c
-	$(CC) -o $@ $(CFLAGS) $^ $(LIBS)
+	$(CC) -o $@ $(CFLAGS) $^ $(LIBS) -lm
 
 lru_perform: cache_perform.c lru.c $(GENERICS) fake_www.c
-	$(CC) -o $@ $(CFLAGS) $^ $(LIBS)
+	$(CC) -o $@ $(CFLAGS) $^ $(LIBS) -lm
 
 lrumin_perform: cache_perform.c lrumin.c $(GENERICS) fake_www.c
-	$(CC) -o $@ $(CFLAGS) $^ $(LIBS)
+	$(CC) -o $@ $(CFLAGS) $^ $(LIBS) -lm
 
 #### Cleanup ####
 clean:
