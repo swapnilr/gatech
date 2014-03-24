@@ -42,10 +42,8 @@ int keycmp(indexminpq_key a, indexminpq_key b) {
 }
 
 int gtcache_init(size_t capacity, size_t min_entry_size, int num_levels){
-  ////printf("Init called with %lu %lu\n", (long) capacity, (long) min_entry_size);
   long size = capacity/min_entry_size;
   cache_entries = (cache_entry_t *) malloc(size * sizeof(cache_entry_t));
-  ////printf("Address of cache_entries %lu\n", (long) cache_entries);  
   cache_capacity = capacity;
   cache_size = size;
   memused = 0;
@@ -74,18 +72,12 @@ int gtcache_init(size_t capacity, size_t min_entry_size, int num_levels){
  *  Update hit!
  */
 void* gtcache_get(char *key, size_t *val_size){
-  //printf("Get called %s %d\n", key, hashtable->N);
   cache_entry_t *savedVal = (cache_entry_t *) hshtbl_get(hashtable, key);
   if(savedVal && strcmp(savedVal->key, key) == 0){
-    ////printf("Entry key %s at %lu\n", savedVal->key, (long) savedVal);
-    ////printf("%d\n",savedVal->id);
     void *retVal = malloc(savedVal->val_size);
-    ////printf("Reached here%s %lu\n", savedVal->key, (long) savedVal->val_size);
     memcpy(retVal, savedVal->value, savedVal->val_size);
-    ////printf("Reached here\n");
     *val_size = savedVal->val_size;
     savedVal->hits = savedVal->hits + 1;
-    ////printf("Increasing hits for %d from %d to %d\n", savedVal->id, *((int *) indexminpq_keyof(priorityqueue, savedVal->id)), savedVal->hits);
     indexminpq_increasekey(priorityqueue, savedVal->id, (indexminpq_key) &(savedVal->hits));
     return retVal;
   }
@@ -104,23 +96,19 @@ void addEntry(char *key, char *value, size_t val_size) {
   entry->value = (char *) malloc(val_size);
   entry->val_size = val_size;
   memcpy(entry->value, value, val_size);
-  ////printf("Entry key %s at %lu\n", entry->key, (long) entry);
   hshtbl_put(hashtable, key, entry);
   memused = memused + val_size;
   entry->hits = 1;
   indexminpq_insert(priorityqueue, index, (indexminpq_key) &(entry->hits));
-  //printf("Add Entry called %s %d\n", key, index);
 }
 
 cache_entry_t* pick_evictee() {
   int index = indexminpq_delmin(priorityqueue);
-  //printf("EVICTING %d\n", index);
   return &(cache_entries[index]);
 }
 
 void evict(size_t val_size) {
   cache_entry_t* evictee = pick_evictee();
-  //printf("Evicting %s at index %d with hits %d\n", evictee->key, evictee->id, evictee->hits);
   steque_enqueue(stack, evictee->id);
   hshtbl_delete(hashtable, evictee->key);
   memused = memused - evictee->val_size;
@@ -133,31 +121,7 @@ void evict(size_t val_size) {
 
 }
 
-/*
- *  If canAdd() [space in cache + cache entry avail]
- *    Add() {
- *      Pick available cache entry
- *      Update cache_entry_t with value + key + size [make copy of key and value]
- *      Put index in hashtable
- *      Put entry in priority queue
- *      Update memused
- *    }
- *  Else
- *    Evict() {
- *      Pick next to evict[in this case, pop from priority queue]
- *      Add index to stack
- *      Remove entry from hashtable
- *      free(key), free(value) from cache_entries
- *      Update memused
- *      if(canAdd()) {
- *        return;
- *      } else {
- *        Evict();
- *      }
- *    Add()
- */
 int gtcache_set(char *key, void *value, size_t val_size){
-  ////printf("Set called with %s, %lu\n", key, (long) val_size);
   if(val_size <= cache_capacity) {
     if(spaceAvailable(val_size)) {
       addEntry(key, value, val_size);
@@ -166,9 +130,6 @@ int gtcache_set(char *key, void *value, size_t val_size){
       addEntry(key, value, val_size);
     }
   }
-  //savedVal = malloc(val_size);
-  //memcpy(savedVal, value, val_size);
-  //val = val_size;
   return 0;
 }
 
@@ -178,18 +139,14 @@ int gtcache_memused(){
 }
 
 void gtcache_destroy(){
-  //printf("Destroy called\n");
   //Clean up everything in cache_entries
   int i;
   for(i=0; i<cache_size; i++) {
     if(cache_entries[i].hits != 0) {
-      //printf("Hits %d for %s\n", cache_entries[i].hits, cache_entries[i].key);
       free(cache_entries[i].key);
       free(cache_entries[i].value);
-      //printf("DONE\n");
     }
   }
-  //printf("Done till here\n");
   free(cache_entries);
   steque_destroy(stack);
   hshtbl_destroy(hashtable);

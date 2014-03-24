@@ -57,13 +57,9 @@ int keycmp(indexminpq_key a, indexminpq_key b) {
 }
 
 int gtcache_init(size_t capacity, size_t min_entry_size, int num_levels){
-  ////////printf("Init called with %lu %lu\n", (long) capacity, (long) min_entry_size);
-  //fprintf(stderr, "==================================================================================\n");
   long size = capacity/min_entry_size;
   cache_entries = (cache_entry_t *) malloc(size * sizeof(cache_entry_t));
-  ////////printf("Address of cache_entries %lu\n", (long) cache_entries);  
   cache_capacity = capacity;
-  //fprintf(stderr, "Cache capacity set to %lu\n", cache_capacity);
   cache_size = size;
   memused = 0;
   levels = num_levels;
@@ -80,7 +76,6 @@ int gtcache_init(size_t capacity, size_t min_entry_size, int num_levels){
   hashtable = (hshtbl_t *) malloc(sizeof(hshtbl_t));
   hshtbl_init(hashtable, 2 * (int) size);
   
-  //fprintf(stderr, "There are %d levels\n", levels);
   queues = (queue *) malloc(num_levels * sizeof(queue));
   size_t lower = 0;
   for(i=0; i<num_levels; i++) {
@@ -94,7 +89,6 @@ int gtcache_init(size_t capacity, size_t min_entry_size, int num_levels){
       upper = 2 * min_entry_size;
     }
     queues[i].upper_bound = upper;
-    //fprintf(stderr, "Level %d from %lu to %lu\n", i+1, lower, upper);
     lower = upper;
   }
   
@@ -111,29 +105,16 @@ int get_queue_index(size_t val_size) {
   return -1;
 }
 
-/*
- *  If in hashtable, get index
- *  cache_entries[index].value
- *  Update hit!
- */
 void* gtcache_get(char *key, size_t *val_size){
-  //fprintf(stderr, "Get called %s %d\n", key, hashtable->N);
   cache_entry_t *savedVal = (cache_entry_t *) hshtbl_get(hashtable, key);
   if(savedVal && strcmp(savedVal->key, key) == 0){
-    ////fprintf(stderr, "Entry key %s at %lu\n", savedVal->key, (long) savedVal);
-    ////fprintf(stderr, "%d\n",savedVal->id);
     void *retVal = malloc(savedVal->val_size);
-    ////fprintf(stderr, "Reached here %s %lu\n", savedVal->key, (long) savedVal->val_size);
     memcpy(retVal, savedVal->value, savedVal->val_size);
-    //printf("Reached here\n");
     *val_size = savedVal->val_size;
     savedVal->hits = savedVal->hits + 1;
     struct timeval start;
     gettimeofday(&start, NULL);
     savedVal->lastTime = (long)(start.tv_sec * 1000000 + start.tv_usec);
-    //printf("Increasing key for %d from %d to %d\n", savedVal->id, *((int *) indexminpq_keyof(priorityqueue, savedVal->id)), (int) start.tv_sec);
-    //printf("Increasing key for %d from %lu to %lu\n", savedVal->id, *((long *) indexminpq_keyof(priorityqueue, savedVal->id)), savedVal->lastTime);
-    //printf("Checking in queue %d for %s(index %d) with val %lu\n", get_queue_index(savedVal->val_size) ,savedVal->key, savedVal->id, (long) savedVal->val_size);
     indexminpq_changekey(queues[get_queue_index(savedVal->val_size)].priorityqueue, savedVal->id, (indexminpq_key) &(savedVal->lastTime));
     return retVal;
   }
@@ -152,33 +133,25 @@ void addEntry(char *key, char *value, size_t val_size) {
   entry->value = (char *) malloc(val_size);
   entry->val_size = val_size;
   memcpy(entry->value, value, val_size);
-  ////////printf("Entry key %s at %lu\n", entry->key, (long) entry);
   hshtbl_put(hashtable, key, entry);
   memused = memused + val_size;
   entry->hits = 1;
   struct timeval start;
   gettimeofday(&start, NULL);
   entry->lastTime = (long)(start.tv_sec * 1000000 + start.tv_usec);
-  ////printf("Setting key for %d to %lu\n", entry->id, entry->lastTime);
   indexminpq_insert(queues[get_queue_index(entry->val_size)].priorityqueue, index, (indexminpq_key) &(entry->lastTime));
-  //printf("Add Entry called %s %d\n", key, index);
 }
 
-/*
- * Needs to pick the evictee and handle everything related to the queue(s)
- */
 cache_entry_t* pick_evictee(size_t val_size) {
   /*
    * Go from Queue to highest queue
    */
   int index = -1;
   int queue_index = get_queue_index(val_size);
-  //fprintf(stderr, "Got queue index %d in levels %d\n", queue_index, levels);
   int i;
   for(i=queue_index+1; i<levels; i++) {
     if(!indexminpq_isempty(queues[i].priorityqueue)) {
       index = indexminpq_delmin(queues[i].priorityqueue);
-      //fprintf(stderr, "AHHHHH FIRST Just deleted %d from %d\n", index, i);
       return &(cache_entries[index]);  
     } 
   }
@@ -190,72 +163,37 @@ cache_entry_t* pick_evictee(size_t val_size) {
     for(i=queue_index; i>=0; i--) {
       if(!indexminpq_isempty(queues[i].priorityqueue)) {
         index = indexminpq_delmin(queues[i].priorityqueue);
-        //fprintf(stderr, "AHHHHH SECOND Just deleted %d from %d\n", index, i);
         return &(cache_entries[index]);
       }
     }
   }
    
-  ////fprintf(stderr, "!!!!!!!!!EVICTING %d from queue %d\n", index, i);
   return &(cache_entries[index]);
 }
 
 void evict(size_t val_size) {
-  //fprintf(stderr, "Looking for %lu space with %lu used of %lu\n", (long) val_size, (long) memused, (long) cache_capacity);
   cache_entry_t* evictee = pick_evictee(val_size);
-  //fprintf(stderr, "-------------Evicting %s at index %d with size %lu\n", evictee->key, evictee->id, (long) evictee->val_size);
-  //fprintf(stderr, "%d items left now!\n", hashtable->N);
   steque_enqueue(stack, evictee->id);
   hshtbl_delete(hashtable, evictee->key);
   memused = memused - evictee->val_size;
   evictee->hits=0;
   free(evictee->key);
   free(evictee->value);
-  //fprintf(stderr, "Space is now %lu\n", (long) memused);
   if(!spaceAvailable(val_size)) {
-    //fprintf(stderr, "NEED MORE SPACE\n");
     evict(val_size-(cache_capacity-memused));
   }
 
 }
 
-/*
- *  If canAdd() [space in cache + cache entry avail]
- *    Add() {
- *      Pick available cache entry
- *      Update cache_entry_t with value + key + size [make copy of key and value]
- *      Put index in hashtable
- *      Put entry in priority queue
- *      Update memused
- *    }
- *  Else
- *    Evict() {
- *      Pick next to evict[in this case, pop from priority queue]
- *      Add index to stack
- *      Remove entry from hashtable
- *      free(key), free(value) from cache_entries
- *      Update memused
- *      if(canAdd()) {
- *        return;
- *      } else {
- *        Evict();
- *      }
- *    Add()
- */
 int gtcache_set(char *key, void *value, size_t val_size){
-  //fprintf(stderr, "Set called with %s, %lu\n", key, (long) val_size);
   if(val_size <= cache_capacity) {
     if(spaceAvailable(val_size)) {
       addEntry(key, value, val_size);
     } else {
-      //fprintf(stderr, "Looks like cache at capacity %lu and memused %ld is full\n", (long) cache_capacity, (long) memused);
       evict(val_size);
       addEntry(key, value, val_size);
     }
   }
-  //savedVal = malloc(val_size);
-  //memcpy(savedVal, value, val_size);
-  //val = val_size;
   return 0;
 }
 
@@ -265,18 +203,14 @@ int gtcache_memused(){
 }
 
 void gtcache_destroy(){
-  //////printf("Destroy called\n");
   //Clean up everything in cache_entries
   int i;
   for(i=0; i<cache_size; i++) {
     if(cache_entries[i].hits != 0) {
-      //////printf("Hits %d for %s\n", cache_entries[i].hits, cache_entries[i].key);
       free(cache_entries[i].key);
       free(cache_entries[i].value);
-      //////printf("DONE\n");
     }
   }
-  //////printf("Done till here\n");
   free(cache_entries);
   steque_destroy(stack);
   hshtbl_destroy(hashtable);
