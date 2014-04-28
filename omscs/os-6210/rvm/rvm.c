@@ -1,5 +1,5 @@
 #include "rvm.h"
-#include "seqsrchst.h"
+//#include "seqsrchst.h"
 #include <fcntl.h>
 #include <stdlib.h>
 #include <string.h>
@@ -7,6 +7,8 @@
 #include <unistd.h>
 #include <stdio.h> // for printf
 
+
+//TODO: Full malloc + free, cleaning up metadata stuff, like segment_t
 /*
    Helper file access methods, to lock access while accessing files
  */
@@ -117,7 +119,7 @@ void *rvm_map(rvm_t rvm, const char *segname, int size_to_create){
     int size = 0;
     sizeBuffer = (void *) (&size);
     write(fd, sizeBuffer, sizeof(int));
-    close(fd);
+    //close(fd);
     segbase = malloc(size_to_create);
   }
 
@@ -149,9 +151,14 @@ void rvm_unmap(rvm_t rvm, void *segbase){
   printf("Unmap called\n");
   segment_t segment = seqsrchst_get(&(rvm->segst), segbase);
   steque_t* mods = &(segment->mods);
-  while(!(steque_isempty(mods))) { // == 0) {
-    mod_t* mod = steque_pop(mods);
-    //Apply undo
+  steque_t* temp = (steque_t*) malloc(sizeof(steque_t));
+  while(!(steque_isempty(mods))) {
+    steque_push(temp, steque_pop(mods));
+  }
+  while(!(steque_isempty(temp))) { // == 0) {
+    mod_t* mod = steque_pop(temp);
+    //TODO - Apply undo in reverse order!
+    //Possibly reverse all the mods order using a separate queue
     memcpy((segbase + mod->offset), mod->undo, mod->size);
     free(mod->undo);
     free(mod);
@@ -160,6 +167,7 @@ void rvm_unmap(rvm_t rvm, void *segbase){
   mods = (steque_t *) malloc(sizeof(steque_t));
   steque_init(mods);
   segment->mods = *mods;
+  //free(segment) -> Do that, but then factor out code to reuse for commit_trans
   printf("Unmap done\n");
 }
 
@@ -187,11 +195,12 @@ trans_t rvm_begin_trans(rvm_t rvm, int numsegs, void **segbases){
          a. Get segment_t = rvm_t.srst[segbase]
          b. trans_t.segments[cur] = segment_t
          c. if segment_t->cur_trans != NULL
-            i. Free trans_t + undo all the mallocs
+            i. Free trans_t + roll back the transactions
             ii. Return (trans_t) -1
          d. segment_t->trans_t = tid
       3. return tid
    */
+   printf("Begin Transaction Called\n");
    trans_t trans = (trans_t) malloc(sizeof(struct _trans_t));
    trans->rvm = rvm;
    trans->numsegs = numsegs;
@@ -209,11 +218,13 @@ trans_t rvm_begin_trans(rvm_t rvm, int numsegs, void **segbases){
        }
        free(trans->segments);
        free(trans);
+       printf("Begin Transaction Failed\n");
        return (trans_t) -1;
      } else {
        current_segment->cur_trans = trans;
      }
    }
+   printf("Begin Transaction Done\n");
    return trans;
 }
 
@@ -227,7 +238,16 @@ void rvm_about_to_modify(trans_t tid, void *segbase, int offset, int size){
       3. mod = [offset, size, undo]
       4. segment_t->mods.enqueue(mod)
    */
-
+  printf("About to Modify Called\n");
+  segment_t segment = seqsrchst_get(&(tid->rvm->segst), segbase);
+  void* undo = malloc(size);
+  memcpy((segbase + offset), undo, size);
+  mod_t* mod = (mod_t *) malloc(sizeof(mod_t));
+  mod->offset = offset;
+  mod->size = size;
+  mod->undo = undo;
+  steque_enqueue(&(segment->mods), (steque_item) mod);
+  printf("About to Modify Done\n");
 }
 
 /*
@@ -239,6 +259,52 @@ void rvm_commit_trans(trans_t tid){
      2. Write segentry_t + data to redo file
      3. Free segentries, mods(+ undo segments) + tid [NOT segment_t]
    */
+  printf("Commit Transaction Called\n");
+  int segmentId;
+  int fd = tid->rvm->redofd;
+  lseek(fd, 0, SEEK_SET);
+  void* sizeBuffer;
+  sizeBuffer = malloc(sizeof(int));
+  read(fd, sizeBuffer, sizeof(int));
+  int entries = *((int*) sizeBuffer);
+  lseek(fd, 0, SEEK_END);
+  for(segmentId=0; segmentId < tid->numsegs; segmentId++) {
+    segment_t segment = tid->segments[segmentId];
+
+    segentry_t* segentry = (segentry_t*) malloc(sizeof(segentry_t));
+    strcpy(segentry->segname, segment->segname);
+    segentry->segsize = segment->size;
+    int size = steque_size(&(segment->mods));
+    segentry->numupdates = size;
+    segentry->offsets = (int*) malloc(size * sizeof(int));
+    segentry->sizes = (int*) malloc(size * sizeof(int));
+    segentry->updatesize = 0;
+    segentry->data = NULL;
+
+    while(!(steque_isempty(&(segment->mods)))) { // == 0) {
+      mod_t* mod = steque_pop(&(segment->mods));
+      //Apply undo
+      int currentsize = segentry->updatesize;
+      segentry->updatesize = segentry->updatesize + mod->size;
+      segentry->data = realloc(segentry->data, segentry->updatesize);
+      memcpy((segentry->data + currentsize), 
+             (segment->segbase + mod->offset), mod->size);
+      free(mod->undo);
+      free(mod);
+    }
+    write(fd, &(segentry->segname), 128);
+    write(fd, &(segentry->segsize), sizeof(int));
+    write(fd, &(segentry->updatesize), sizeof(int));
+    write(fd, &(segentry->numupdates), sizeof(int));
+    write(fd, segentry->offsets, segentry->numupdates * sizeof(int));
+    write(fd, segentry->sizes, segentry->numupdates * sizeof(int));
+    write(fd, segentry->data, segentry->updatesize);
+    entries++;
+  }
+  lseek(fd, 0, SEEK_SET);
+  write(fd, &entries, sizeof(int));
+ 
+  printf("Commit Transaction Done\n");  
 }
 
 /*
@@ -250,7 +316,15 @@ void rvm_abort_trans(trans_t tid){
      2. Apply undo segment to offset, size of segbase
      3. Free mods, undo segments, tid
    */
-
+  printf("Abort Transaction Called\n");
+  int segmentId;
+  for(segmentId=0; segmentId < tid->numsegs; segmentId++){
+    segment_t segment = tid->segments[segmentId];
+    rvm_unmap(tid->rvm, segment->segbase);
+    segment->cur_trans = NULL;
+  }
+  free(tid);
+  printf("Abort Transaction Done\n");
 }
 
 /*
@@ -263,6 +337,70 @@ void rvm_truncate_log(rvm_t rvm){
      3. Truncate redo log file
      4. Free _redo_t + segentries
    */
+  int fd = rvm->redofd;
+  void* sizeBuffer = malloc(sizeof(int));
+  read(fd, sizeBuffer, sizeof(int));
+  int size = *((int *) sizeBuffer);
+  int entry;
+  for(entry=0; entry<size; entry++) {
+    segentry_t* segentry = (segentry_t *) malloc(sizeof(segentry));
+    read(fd, &(segentry->segname), 128);
+    read(fd, &(segentry->segsize), sizeof(int));
+    read(fd, &(segentry->updatesize), sizeof(int));
+    read(fd, &(segentry->numupdates), sizeof(int));
+    segentry->offsets = (int*) malloc(segentry->numupdates * sizeof(int));
+    segentry->sizes = (int*) malloc(segentry->numupdates * sizeof(int));
+    read(fd, segentry->offsets, segentry->numupdates * sizeof(int));
+    read(fd, segentry->sizes, segentry->numupdates * sizeof(int));
+    segentry->data = malloc(segentry->updatesize);
+    read(fd, segentry->data, segentry->updatesize);
 
+
+    char *segFN = segFileName(rvm, segentry->segname);
+    int segFD = open(segFN, O_RDWR | O_CREAT, S_IRWXU | S_IRGRP | S_IROTH);
+    // Read size first and then read that much into segbase
+    void *sizeBuffer = malloc(sizeof(int));
+    int retVal = read(segFD, sizeBuffer, sizeof(int));
+    if(retVal == -1) {
+      printf("ERROR while trying to read size from segment file");
+      exit(1);
+    }
+    int size = *((int *) sizeBuffer);
+    void* segbase = malloc(size);
+    retVal = read(segFD, segbase, size);
+    if (retVal == -1) {
+      printf("ERROR while trying to read segment file");
+      exit(1);
+    }
+
+    // TODO: See what happens if updates are at the end? How do they work?
+    // Where is segsize increased?
+    if(segentry->segsize > size) {
+      segbase = realloc(segbase, segentry->segsize);
+      size = segentry->segsize;
+    }
+
+    int dataOffset = 0;
+    // Applying Updates
+    int update;
+    for(update=0; update<segentry->numupdates; update++) {
+      memcpy((segbase + segentry->offsets[update]), 
+             (segentry->data + dataOffset), segentry->sizes[update]);
+      dataOffset = dataOffset + segentry->sizes[update];
+    }
+    lseek(segFD, 0, SEEK_SET);
+    write(segFD, &size, sizeof(int));
+    write(segFD, &segbase, size);
+    free(segentry->offsets);
+    free(segentry->sizes);
+    free(segentry->data);
+    free(segentry);
+  }
+  close(fd);
+  char *fullFN = concat(rvm->prefix, "/rvm.redo");
+  //printf("FILENAME - %s\n", fullFN);
+  remove(fullFN);
+  fd = open(fullFN, O_RDWR | O_CREAT, S_IRWXU | S_IRGRP | S_IROTH);
+  rvm->redofd = fd;  
 }
 
