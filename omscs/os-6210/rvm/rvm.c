@@ -14,7 +14,7 @@
    Helper file access methods, to lock access while accessing files
  */
 
-int debugLevel = 0;
+int debugLevel = 1;
 
 char *concat(const char* str1, const char* str2) {
    size_t lenDir = strlen(str1);
@@ -106,7 +106,7 @@ rvm_t rvm_init(const char *directory){
           b. fd
           c. New seqsrchst (seg base -> segment)
    */
-   if(debugLevel > 0) fprintf(stderr, "Init Called\n");
+   if(debugLevel > 0) fprintf(stderr, "Init Called in %d\n", (int) getpid());
 
    //size_t lenDir = strlen(directory);
    //const char *redoFN = "/rvm.redo";
@@ -129,7 +129,7 @@ rvm_t rvm_init(const char *directory){
    rvm->redofd = fd;
    rvm->segst = *((seqsrchst_t *) malloc(sizeof(seqsrchst_t)));
    seqsrchst_init(&(rvm->segst), &equals);
-   if(debugLevel > 0) fprintf(stderr, "Init Done\n");
+   if(debugLevel > 0) fprintf(stderr, "Init Done in %d\n", (int) getpid());
    return rvm;
 
 }
@@ -149,7 +149,7 @@ void *rvm_map(rvm_t rvm, const char *segname, int size_to_create){
       4. Add segbase -> segment_t to rvm_t.segst
       5. Return segbase
    */
-  if(debugLevel > 0) fprintf(stderr, "Map Called\n");
+  if(debugLevel > 0) fprintf(stderr, "Map Called in %d\n", (int) getpid());
   //char *segFN = concat(segname, ".seg");
   //char *suffix = concat("/", segFN);
   //char *fileName = concat(rvm->prefix, suffix);
@@ -220,7 +220,7 @@ void *rvm_map(rvm_t rvm, const char *segname, int size_to_create){
       if(debugLevel > 0) fprintf(stderr, "\n");
   }
 
-  if(debugLevel > 0) fprintf(stderr, "Map Done\n");
+  if(debugLevel > 0) fprintf(stderr, "Map Done in %d\n", (int) getpid());
   return segbase;
 }
 
@@ -232,27 +232,32 @@ void rvm_unmap(rvm_t rvm, void *segbase){
       1. Get segment_t from rvm_t.srchst[segbase]
       2. Zero out segment_t queue of modifications
    */
-  if(debugLevel > 0) fprintf(stderr, "Unmap called\n");
+  if(debugLevel > 0) fprintf(stderr, "Unmap called in %d\n", (int) getpid());
   segment_t segment = seqsrchst_get(&(rvm->segst), segbase);
   steque_t* mods = &(segment->mods);
   steque_t* temp = (steque_t*) malloc(sizeof(steque_t));
+  steque_init(temp);
+  if(debugLevel > 0) fprintf(stderr, "Old Queue Size %d\n", steque_size(mods));
   while(!(steque_isempty(mods))) {
     steque_push(temp, steque_pop(mods));
   }
+  if(debugLevel > 0) fprintf(stderr, "Done with queue\n");
+  if(debugLevel > 0) fprintf(stderr, "New Queue Size %d\n", steque_size(temp));
   while(!(steque_isempty(temp))) { // == 0) {
     mod_t* mod = steque_pop(temp);
     //TODO - Apply undo in reverse order!
     //Possibly reverse all the mods order using a separate queue
     memcpy((segbase + mod->offset), mod->undo, mod->size);
+    if(debugLevel > 0) fprintf(stderr, "Unapplied mod %d, %d\n", mod->offset, mod->size);
     free(mod->undo);
     free(mod);
   }
-  free(mods);
-  mods = (steque_t *) malloc(sizeof(steque_t));
-  steque_init(mods);
-  segment->mods = *mods;
+  //free(mods);
+  //&(segment->mods) = (steque_t *) malloc(sizeof(steque_t));
+  //steque_init(&(segment->mods));
+  //segment->mods = *mods;
   //free(segment) -> Do that, but then factor out code to reuse for commit_trans
-  if(debugLevel > 0) fprintf(stderr, "Unmap done\n");
+  if(debugLevel > 0) fprintf(stderr, "Unmap done in %d\n", (int) getpid());
 }
 
 /*
@@ -262,11 +267,11 @@ void rvm_destroy(rvm_t rvm, const char *segname){
   /*
       1. Delete <segname>.seg
    */
-  if(debugLevel > 0) fprintf(stderr, "Destroy Called\n");
+  if(debugLevel > 0) fprintf(stderr, "Destroy Called in %d\n", (int) getpid());
   char* segFN = segFileName(rvm, segname);
   remove(segFN);
   free(segFN);
-  if(debugLevel > 0) fprintf(stderr, "Destory Done\n");
+  if(debugLevel > 0) fprintf(stderr, "Destory Done in %d\n", (int) getpid());
 }
 
 /*
@@ -284,7 +289,7 @@ trans_t rvm_begin_trans(rvm_t rvm, int numsegs, void **segbases){
          d. segment_t->trans_t = tid
       3. return tid
    */
-   if(debugLevel > 0) fprintf(stderr, "Begin Transaction Called\n");
+   if(debugLevel > 0) fprintf(stderr, "Begin Transaction Called in %d\n", (int) getpid());
    trans_t trans = (trans_t) malloc(sizeof(struct _trans_t));
    trans->rvm = rvm;
    trans->numsegs = numsegs;
@@ -305,7 +310,7 @@ trans_t rvm_begin_trans(rvm_t rvm, int numsegs, void **segbases){
        }
        free(trans->segments);
        free(trans);
-       if(debugLevel > 0) fprintf(stderr, "Begin Transaction Failed\n");
+       if(debugLevel > 0) fprintf(stderr, "Begin Transaction Failed in %d\n", (int) getpid());
        return (trans_t) -1;
      } else {
        current_segment->cur_trans = trans;
@@ -313,7 +318,7 @@ trans_t rvm_begin_trans(rvm_t rvm, int numsegs, void **segbases){
      }
    }
    //printTrans(trans);
-   if(debugLevel > 0) fprintf(stderr, "Begin Transaction Done\n");
+   if(debugLevel > 0) fprintf(stderr, "Begin Transaction Done in %d\n", (int) getpid());
    return trans;
 }
 
@@ -327,16 +332,17 @@ void rvm_about_to_modify(trans_t tid, void *segbase, int offset, int size){
       3. mod = [offset, size, undo]
       4. segment_t->mods.enqueue(mod)
    */
-  if(debugLevel > 0) fprintf(stderr, "About to Modify Called\n");
+  if(debugLevel > 0) fprintf(stderr, "About to Modify Called in %d\n", (int) getpid());
+  if(debugLevel > 0) fprintf(stderr, "Segbase:%p Offset%d Size%d\n", segbase, offset, size);
   segment_t segment = seqsrchst_get(&(tid->rvm->segst), segbase);
   void* undo = malloc(size);
-  memcpy((segbase + offset), undo, size);
+  memcpy(undo, (segbase + offset), size);
   mod_t* mod = (mod_t *) malloc(sizeof(mod_t));
   mod->offset = offset;
   mod->size = size;
   mod->undo = undo;
   steque_enqueue(&(segment->mods), (steque_item) mod);
-  if(debugLevel > 0) fprintf(stderr, "About to Modify Done\n");
+  if(debugLevel > 0) fprintf(stderr, "About to Modify Done in %d\n", (int) getpid());
 }
 
 /*
@@ -348,7 +354,7 @@ void rvm_commit_trans(trans_t tid){
      2. Write segentry_t + data to redo file
      3. Free segentries, mods(+ undo segments) + tid [NOT segment_t]
    */
-  if(debugLevel > 0) fprintf(stderr, "Commit Transaction Called\n");
+  if(debugLevel > 0) fprintf(stderr, "Commit Transaction Called in %d\n", (int) getpid());
   int segmentId;
   int fd = tid->rvm->redofd;
   off_t o = lseek(fd, 0, SEEK_SET);
@@ -420,6 +426,7 @@ void rvm_commit_trans(trans_t tid){
     write(fd, segentry->offsets, segentry->numupdates * sizeof(int));
     write(fd, segentry->sizes, segentry->numupdates * sizeof(int));
     write(fd, segentry->data, segentry->updatesize);
+    segment->cur_trans=NULL;
     entries++;
   }
   //if(debugLevel > 0) fprintf(stderr, "Writing Size %d\n", entries);
@@ -429,7 +436,8 @@ void rvm_commit_trans(trans_t tid){
   void* buf = malloc(sizeof(int));
   read(fd, buf, sizeof(int));
   //if(debugLevel > 0) fprintf(stderr, "Read %d\n", *((int *) buf));
-  if(debugLevel > 0) fprintf(stderr, "Commit Transaction Done\n"); 
+  free(tid);
+  if(debugLevel > 0) fprintf(stderr, "Commit Transaction Done in %d\n", (int) getpid()); 
 }
 
 /*
@@ -441,7 +449,7 @@ void rvm_abort_trans(trans_t tid){
      2. Apply undo segment to offset, size of segbase
      3. Free mods, undo segments, tid
    */
-  if(debugLevel > 0) fprintf(stderr, "Abort Transaction Called\n");
+  if(debugLevel > 0) fprintf(stderr, "Abort Transaction Called in %d\n", (int) getpid());
   int segmentId;
   for(segmentId=0; segmentId < tid->numsegs; segmentId++){
     segment_t segment = tid->segments[segmentId];
@@ -449,7 +457,7 @@ void rvm_abort_trans(trans_t tid){
     segment->cur_trans = NULL;
   }
   free(tid);
-  if(debugLevel > 0) fprintf(stderr, "Abort Transaction Done\n");
+  if(debugLevel > 0) fprintf(stderr, "Abort Transaction Done in %d\n", (int) getpid());
 }
 
 /*
@@ -462,7 +470,7 @@ void rvm_truncate_log(rvm_t rvm){
      3. Truncate redo log file
      4. Free _redo_t + segentries
    */
-  if(debugLevel > 0) fprintf(stderr, "Truncate Log Called\n");
+  if(debugLevel > 0) fprintf(stderr, "Truncate Log Called in %d\n", (int) getpid());
   int fd = rvm->redofd;
   lseek(fd, 0, SEEK_SET);
   void* sizeBuffer = malloc(sizeof(int));
@@ -580,6 +588,6 @@ void rvm_truncate_log(rvm_t rvm){
   rvm->redofd = fd;
   int zsize = 0;
   write(fd, &zsize, sizeof(int));
-  if(debugLevel > 0) fprintf(stderr, "Truncate Log Done\n");
+  if(debugLevel > 0) fprintf(stderr, "Truncate Log Done in %d\n", (int) getpid());
 }
 
