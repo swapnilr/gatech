@@ -1,0 +1,19 @@
+
+Blocked Dense LU Factorization
+     512 by 512 Matrix
+     1 Processors
+     16 by 16 Element Blocks
+
+
+                            PROCESS STATISTICS
+              Total      Diagonal     Perimeter      Interior       Barrier
+ Proc         Time         Time         Time           Time          Time
+    0             0             0             0             0             0
+
+                            TIMING INFORMATION
+Start time                        :       1409719461
+Initialization finish time        :       1409719461
+Overall finish time               :       1409719461
+Total time with initialization    :                0
+Total time without initialization :                0
+

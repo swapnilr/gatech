@@ -1,0 +1,17 @@
+ud233user@ud233user-VirtualBox:~/sesc/tests$ ~/sesc/scripts/report.pl sesc_hello.mipseb.PartF
+# Bench : /home/ud233user/sesc/sesc.opt -c /home/ud233user/sesc/confs/cmp16-noc.conf -ohello.out hello.mipseb 
+# File  : sesc_hello.mipseb.PartF :       Tue Sep  2 22:42:17 2014
+      Exe Speed        Exe MHz         Exe Time         Sim Time (1000MHz)
+      0.550 KIPS      0.0099 MHz       8.810 secs       0.087 msec
+Proc  Avg.Time BPType       Total          RAS           BPred          BTB            BTAC
+   0   129.843  hybrid       49.55% ( 95.74% of  10.63%)  44.05% ( 58.05% of  42.87%)   0.00% 
+           nInst     BJ    Load   Store      INT      FP  : LD Forward , Replay : Worst Unit (clk)
+   0        4848  18.23%  20.15%  18.61%  43.01%   0.00%  :      0.10%   ????  inst/repl  :  LDSTIssueX 1.11 
+Proc  IPC        Cycles  Busy   LDQ   STQ  IWin   ROB  Regs Ports   TLB  maxBr MisBr Br4Clk  Other
+   0  0.06        86883   2.8   0.0   0.0   0.3   0.0   0.0   0.0   0.0   0.0   96.7    0.0    0.2 
+################################################################################
+Proc  Cache Occ MissRate (RD, WR) %DMemAcc MB/s : ... 
+   0  DL1 0.2   5.28% ( 3.2%, 2.0%) 114.84%  0.08GB/s :  MemoryBus 0 MB/s : 
+################################################################################
+Proc  Cache Occ MissRate (RD, WR) %DMemAcc MB/s : ... 
+   0  IL1 0.6   9.72% ( 9.7%, 0.0%) 166.86%  0.22GB/s :  MemoryBus 0 MB/s :
