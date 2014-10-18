@@ -1,0 +1,20 @@
+package edu.gatech.ml.assignment2;
+
+import shared.DataSet;
+
+//import shared.DataSetReader;
+
+public class DataSetReadingTest {
+
+	public static void main(String[] args) {
+		ArffDataSetReader data = new ArffDataSetReader("/Users/swapnilr/gatech/omscs/ml-7641/modifiedLetter.data");
+		try {
+			DataSet set = data.read();
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+
+	}
+
+}

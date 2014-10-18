@@ -1,0 +1,18 @@
+package edu.gatech.ml.assignment2;
+
+import shared.DataSetReader;
+
+public class DataSetReadingTest {
+
+	public static void main(String[] args) {
+		DataSetReader data = new DataSetReader("/Users/swapnilr/gatech/omscs/ml-7641/modifiedLetter.data");
+		try {
+			data.read();
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+
+	}
+
+}

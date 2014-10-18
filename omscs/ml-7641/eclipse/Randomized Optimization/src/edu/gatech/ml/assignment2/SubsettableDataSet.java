@@ -1,0 +1,38 @@
+package edu.gatech.ml.assignment2;
+
+import java.util.Arrays;
+
+import shared.DataSet;
+//import shared.DataSetDescription;
+//import shared.Instance;
+import shared.DataSetDescription;
+import shared.Instance;
+
+public class SubsettableDataSet extends DataSet {
+
+	public SubsettableDataSet(DataSet dataset) {
+		super(dataset.getInstances(), dataset.getDescription());
+		// TODO Auto-generated constructor stub
+	}
+	
+	public SubsettableDataSet(Instance[] instances, DataSetDescription description) {
+		super(instances, description);
+    }
+    
+    /**
+     * Make a new data set with the given instances
+     * @param instances the instances
+     */
+    public SubsettableDataSet(Instance[] instances) {
+        super(instances);
+    }
+	
+	public SubsettableDataSet getSubset(int startingIndex, int endIndex) {
+		Instance[] original = this.getInstances();
+		Instance[] instances = Arrays.copyOfRange(original, startingIndex, endIndex);
+		SubsettableDataSet s = new SubsettableDataSet(instances);
+		s.setDescription(new DataSetDescription(s));
+		return s;
+	}
+
+}

@@ -1,0 +1,46 @@
+package edu.gatech.ml.assignment2;
+
+import shared.DataSet;
+import shared.DataSetDescription;
+//import shared.Instance;
+
+//import shared.DataSetReader;
+
+public class DataSetReadingTest {
+
+	public static void main(String[] args) {
+		MyDataSetReader data = new MyDataSetReader("/Users/swapnilr/gatech/omscs/ml-7641/modifiedLetter.data");
+		try {
+			SubsettableDataSet set = data.read();
+			//Vector v = i.getData();
+			/*for(int k=0; k<set.size();k++) {
+				Instance i = set.get(k);
+				for(int d=0; d<i.size(); d++) {
+					System.out.print(i.getDiscrete(d) + ", ");
+				}
+				System.out.println((char)('A' + i.getLabel().getDiscrete()));
+			}*/
+			System.out.println("Size = " + set.size());
+			DataSetDescription desc = set.getDescription();
+			System.out.println("AttributeCount = " + desc.getAttributeCount());
+			
+			SubsettableDataSet trainingSet = set.getSubset(0, 16000);
+			System.out.println("Size = " + trainingSet.size());
+			DataSetDescription trainingDesc = trainingSet.getDescription();
+			System.out.println("AttributeCount = " + trainingDesc.getAttributeCount());
+			
+			SubsettableDataSet testSet = set.getSubset(16000, set.size());
+			System.out.println("Size = " + testSet.size());
+			DataSetDescription testDesc = testSet.getDescription();
+			System.out.println("AttributeCount = " + testDesc.getAttributeCount());
+			
+			
+			//System.out.println(desc.getAttributeTypes()[0].toString());
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+
+	}
+
+}

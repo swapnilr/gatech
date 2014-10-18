@@ -1,0 +1,13 @@
+package edu.gatech.ml.assignment2;
+
+import shared.DataSetReader;
+
+public class DataSetReadingTest {
+
+	public static void main(String[] args) {
+		DataSetReader data = new DataSetReader("/Users/swapnilr/Downloads/UCI/letter.arff");
+		data.read();
+
+	}
+
+}

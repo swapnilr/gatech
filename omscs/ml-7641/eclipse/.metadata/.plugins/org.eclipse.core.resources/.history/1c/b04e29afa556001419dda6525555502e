@@ -1,0 +1,7 @@
+package edu.gatech.ml.assignment2;
+
+import shared.DataSetReader;
+
+public class ArffDataSetReader extends DataSetReader {
+
+}

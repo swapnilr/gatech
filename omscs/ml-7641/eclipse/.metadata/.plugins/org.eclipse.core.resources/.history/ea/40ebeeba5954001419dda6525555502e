@@ -1,0 +1,12 @@
+package edu.gatech.ml.assignment2;
+
+import opt.example;
+
+public class Test {
+
+	public static void main(String[] args) {
+		// TODO Auto-generated method stub
+		//AdaBoostTest.main(new String[0]);
+	}
+
+}

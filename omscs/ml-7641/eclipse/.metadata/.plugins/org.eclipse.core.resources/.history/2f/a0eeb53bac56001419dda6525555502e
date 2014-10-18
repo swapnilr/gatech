@@ -1,0 +1,7 @@
+package edu.gatech.ml.assignment2;
+
+import shared.DataSet;
+
+public class SubsettableDataSet extends DataSet {
+
+}
