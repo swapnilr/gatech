@@ -1,0 +1,13 @@
+package edu.gatech.ml.assignment2;
+
+import shared.Trainer;
+
+public class FixedTimeTrainer implements Trainer {
+
+	@Override
+	public double train() {
+		// TODO Auto-generated method stub
+		return 0;
+	}
+
+}

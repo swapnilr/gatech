@@ -1,0 +1,23 @@
+package edu.gatech.ml.assignment2;
+
+import opt.test.ContinuousPeaksTest;
+import opt.test.CountOnesTest;
+import opt.test.FlipFlopTest;
+import opt.test.KnapsackTest;
+import opt.test.TravelingSalesmanTest;
+import opt.test.XORTest;
+
+public class Tests {
+
+	public static void main(String[] args) {
+		// TODO Auto-generated method stub
+		ContinuousPeaksTest.main(null);
+		CountOnesTest.main(null);
+		FlipFlopTest.main(null);
+		KnapsackTest.main(null);
+		TravelingSalesmanTest.main(null);
+		XORTest.main(null);
+
+	}
+
+}

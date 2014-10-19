@@ -5,17 +5,19 @@ import opt.RandomizedHillClimbing;
 import opt.SimulatedAnnealing;
 import opt.example.NeuralNetworkOptimizationProblem;
 import opt.ga.StandardGeneticAlgorithm;
-import func.nn.FeedForwardLayer;
-import func.nn.FeedForwardNetwork;
-import func.nn.FeedForwardNode;
+//import func.nn.FeedForwardLayer;
+//import func.nn.FeedForwardNetwork;
+//import func.nn.FeedForwardNode;
 import func.nn.NeuralNetwork;
-import func.nn.activation.HyperbolicTangentSigmoid;
+//import func.nn.activation.HyperbolicTangentSigmoid;
+import func.nn.backprop.BackPropagationNetwork;
+import func.nn.backprop.BackPropagationNetworkFactory;
 import shared.DataSet;
 //import shared.DataSet;
 import shared.DataSetDescription;
 //import shared.Instance;
 import shared.ErrorMeasure;
-import shared.FixedIterationTrainer;
+//import shared.FixedIterationTrainer;
 import shared.Instance;
 import shared.SumOfSquaresError;
 
@@ -23,7 +25,7 @@ import shared.SumOfSquaresError;
 
 public class DataSetReadingTest {
 	
-	private static void test(FixedIterationTrainer fit, OptimizationAlgorithm o,
+	private static void test(FixedTimeTrainer fit, OptimizationAlgorithm o,
 			DataSet trainingSet, DataSet testSet, NeuralNetwork network){
 		long startTime = System.nanoTime();
 		fit.train();
@@ -111,7 +113,7 @@ public class DataSetReadingTest {
 		    //       new int[] { 4, 3, 1 });
 			
 			// Input Layer
-			FeedForwardLayer input = new FeedForwardLayer();
+			/*FeedForwardLayer input = new FeedForwardLayer();
 			for(int i=0;i<desc.getAttributeCount();i++) {
 				input.addNode(new FeedForwardNode(new HyperbolicTangentSigmoid()));
 			}
@@ -140,25 +142,51 @@ public class DataSetReadingTest {
 			for(int i=0; i<hidden2.getNodeCount();i++) {
 				hidden2.getNode(i).connect(output.getNode(i));
 			}
-			System.out.println(network.getLinks().size());
+			System.out.println(network.getLinks().size());*/
 			
 			//network.connect();
-		    ErrorMeasure measure = new SumOfSquaresError();
+		    //ErrorMeasure measure = new SumOfSquaresError();
 		    //    DataSet set1 = new DataSet(patterns);
-		   NeuralNetworkOptimizationProblem nno = new NeuralNetworkOptimizationProblem(
-		            trainingSet, network, measure);
+		   //NeuralNetworkOptimizationProblem nno = new NeuralNetworkOptimizationProblem(
+		   //         trainingSet, network, measure);
 		   //System.out.println(network.getLinks().size());
-		   int NUMBER_OF_ITERATIONS = 20;//00;
-		   OptimizationAlgorithm o = new RandomizedHillClimbing(nno);
-		   FixedIterationTrainer fit = new FixedIterationTrainer(o, NUMBER_OF_ITERATIONS);
+		   //int NUMBER_OF_ITERATIONS = 2000;
+		   //OptimizationAlgorithm o = new RandomizedHillClimbing(nno);
+		   //FixedIterationTrainer fit = new FixedIterationTrainer(o, NUMBER_OF_ITERATIONS);
 		   //test(fit,o, trainingSet, testSet, network);
 		   
-		   SimulatedAnnealing sa = new SimulatedAnnealing(100, .95, nno);
-		   fit = new FixedIterationTrainer(sa, NUMBER_OF_ITERATIONS);
-		   //test(fit,sa, testSet, network);
-		   StandardGeneticAlgorithm ga = new StandardGeneticAlgorithm(200, 100, 20, nno);
-	       fit = new FixedIterationTrainer(ga, NUMBER_OF_ITERATIONS);
-		   test(fit,ga, trainingSet, testSet,network);
+		   //SimulatedAnnealing sa = new SimulatedAnnealing(100, .95, nno);
+		   //fit = new FixedIterationTrainer(sa, NUMBER_OF_ITERATIONS);
+		   //test(fit,sa, trainingSet, testSet, network);
+		   //StandardGeneticAlgorithm ga = new StandardGeneticAlgorithm(200, 100, 20, nno);
+	       //fit = new FixedIterationTrainer(ga, NUMBER_OF_ITERATIONS);
+		   //test(fit,ga, trainingSet, testSet,network);
+			int NUMBER_OF_SECONDS = 1200;
+			System.out.println("Testing for " + NUMBER_OF_SECONDS + " seconds.");
+		   BackPropagationNetworkFactory factory = 
+		            new BackPropagationNetworkFactory();
+		   BackPropagationNetwork network1 = factory.createClassificationNetwork(
+		           new int[] { 16, 31, 26, 26 });
+		        ErrorMeasure measure1 = new SumOfSquaresError();
+		        //DataSet set = new DataSet(patterns);
+		        NeuralNetworkOptimizationProblem nno1 = new NeuralNetworkOptimizationProblem(
+		            trainingSet, network1, measure1);
+		        OptimizationAlgorithm o1 = new RandomizedHillClimbing(nno1);
+		        System.out.println("Randomized Hill Climbing");
+		        FixedTimeTrainer fit1 = new FixedTimeTrainer(o1, NUMBER_OF_SECONDS);
+		        fit1.train();
+		        test(fit1,o1, trainingSet, testSet,network1);
+		        o1 = new StandardGeneticAlgorithm(200, 100, 20, nno1);
+		        System.out.println("Genetic Algorithm");
+		        fit1 = new FixedTimeTrainer(o1, NUMBER_OF_SECONDS);
+		        fit1.train();
+		        test(fit1,o1, trainingSet, testSet,network1);
+		        o1 = new SimulatedAnnealing(100, .95, nno1);
+		        System.out.println("Simulated Annealing");
+		        fit1 = new FixedTimeTrainer(o1, NUMBER_OF_SECONDS);
+		        fit1.train();
+		        test(fit1,o1, trainingSet, testSet,network1);
+		        
 		   
 		   
 		} catch (Exception e) {
