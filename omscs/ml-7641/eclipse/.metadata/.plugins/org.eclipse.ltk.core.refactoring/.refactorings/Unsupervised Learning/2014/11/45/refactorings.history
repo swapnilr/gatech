@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<session version="1.0">
+<refactoring comment="Rename local variable &apos;v&apos; in &apos;edu.gatech.ml.assignment3.FirstTest.main(...)&apos; to &apos;pred_to_orig&apos;&#x0A;- Original project: &apos;Unsupervised Learning&apos;&#x0A;- Original element: &apos;edu.gatech.ml.assignment3.FirstTest.main(String[]).v&apos;&#x0A;- Renamed element: &apos;v&apos;&#x0A;- Update references to refactored element" description="Rename local variable &apos;v&apos;" id="org.eclipse.jdt.ui.rename.local.variable" input="/src&lt;edu.gatech.ml.assignment3{FirstTest.java[FirstTest~main~\[QString;@v!2070!2097!2079!2079!\[QVector;!0!false" name="pred_to_orig" references="true" stamp="1415480357661" version="1.0"/>
+</session>

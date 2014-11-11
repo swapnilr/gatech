@@ -1,0 +1,271 @@
+package edu.gatech.ml.assignment3;
+
+import java.io.BufferedReader;
+import java.io.FileReader;
+
+import weka.attributeSelection.AttributeSelection;
+import weka.attributeSelection.InfoGainAttributeEval;
+import weka.attributeSelection.Ranker;
+import weka.classifiers.evaluation.Evaluation;
+import weka.classifiers.functions.MultilayerPerceptron;
+import weka.clusterers.AbstractClusterer;
+import weka.clusterers.EM;
+import weka.clusterers.SimpleKMeans;
+import weka.core.Instance;
+import weka.core.Instances;
+import weka.core.converters.ArffLoader.ArffReader;
+import weka.filters.AllFilter;
+import weka.filters.Filter;
+import weka.filters.unsupervised.attribute.Add;
+import weka.filters.unsupervised.attribute.IndependentComponents;
+import weka.filters.unsupervised.attribute.PrincipalComponents;
+import weka.filters.unsupervised.attribute.RandomProjection;
+import weka.filters.unsupervised.attribute.Remove;
+
+public class MainExperiment {
+
+	public static void main(String[] args) {
+
+		try {
+			Filter[] filters = new Filter[5];
+			filters[0] = new AllFilter();
+			filters[1] = new PrincipalComponents();
+			filters[2] = new IndependentComponents();
+			filters[3] = new RandomProjection();
+			
+			
+			
+			String fn = "/Users/swapnilr/gatech/omscs/ml-7641/letter.arff";
+			
+			
+			
+			int numLabels = 26;
+			
+			AbstractClusterer[] clusterers = new AbstractClusterer[2];
+			SimpleKMeans km = new SimpleKMeans();
+			km.setNumClusters(numLabels);
+			clusterers[0] = km;
+			EM em = new EM();
+			em.setNumClusters(numLabels);
+			clusterers[1] = em;
+			
+			BufferedReader reader1 = new BufferedReader(new FileReader(fn));
+			ArffReader arff1 = new ArffReader(reader1);
+			Instances validationData = arff1.getData();
+			validationData.setClassIndex(validationData.numAttributes() - 1);
+			
+			for(AbstractClusterer c: clusterers) {
+				BufferedReader reader = new BufferedReader(new FileReader(fn));
+				ArffReader arff = new ArffReader(reader);
+				Instances trainingData = arff.getData();
+				Instances backup = new Instances(trainingData);
+				trainingData.deleteAttributeAt(trainingData.numAttributes() - 1);
+				backup.setClassIndex(16);
+				/*Add filter = new Add();
+				/*filter.setAttributeIndex("last");
+				filter.setAttributeName("cluster");
+				filter.setInputFormat(trainingData);
+				trainingData = Filter.useFilter(trainingData, filter);
+				System.out.println("Running Experiment for " + c.getClass() + " with number of labels = " + numLabels);
+				c.buildClusterer(trainingData);	
+				
+				for(int i=0; i<trainingData.size(); i++) {
+					// Add Clusters
+					Instance ins = trainingData.get(i);
+					ins.setValue(trainingData.numAttributes() - 1, c.clusterInstance(ins));
+					// Add Labels
+					// Delete others?
+				}*/
+				
+				Add filter = new Add();
+				filter.setAttributeIndex("last");
+				filter.setAttributeName("class");
+				filter.setInputFormat(trainingData);
+				trainingData = Filter.useFilter(trainingData, filter);
+				
+				
+				
+				for(int i=0; i<trainingData.size(); i++) {
+					Instance ins = trainingData.get(i);
+					ins.setValue(trainingData.numAttributes() - 1, backup.get(i).classValue());
+				}
+				
+				/*for(int i=0;i<trainingData.numAttributes(); i++) {
+					System.out.println(trainingData.attribute(i).name());
+				}*/
+				
+			     /*Remove remove = new Remove();
+			     int[] indices = new int[16];
+			     for(int i=0; i< 16; i++) {
+			    	 indices[i] = i;
+			     }
+			     remove.setAttributeIndicesArray(indices);
+			     //remove.setInvertSelection(new Boolean(args[2]).booleanValue());
+			     remove.setInputFormat(trainingData);
+			     trainingData = Filter.useFilter(trainingData, remove);
+				*/
+			    /*for(int i=0;i<trainingData.numAttributes(); i++) {
+						System.out.println(trainingData.attribute(i).name());
+				}*/
+			     
+				
+				trainingData.setClassIndex(trainingData.numAttributes() - 1);
+				System.out.println(trainingData.classIndex());
+				runNeuralNetwork(trainingData);
+			}
+			
+			
+			
+			//trainingData.setClassIndex(trainingData.numAttributes() - 1);
+			//filter.SelectAttributes(trainingData);
+			//trainingData = filter.reduceDimensionality(trainingData);
+			//runNeuralNetwork(trainingData);
+			
+			//runExperiments(null);
+			
+			
+			//for(int i=3; i<4;i++) {
+			//	runExperiments(filters[i]);
+			//}
+			
+			/*AttributeSelection filter = new AttributeSelection();  // package weka.filters.supervised.attribute!
+			InfoGainAttributeEval eval = new InfoGainAttributeEval();
+			Ranker r =new Ranker();
+			r.setNumToSelect(10);
+			//search.setSearchBackwards(true);
+			filter.setEvaluator(eval);
+			filter.setSearch(r);
+			filter.SelectAttributes(data);
+			Instances newData = filter.reduceDimensionality(data);*/
+			
+			//Both Datasets
+			  // Nothing + 4 Dimensionality Reduction
+			    // Clustering experiments - EM + K-means {Various possibilites for 1
+			
+			// Data Set 1
+			  // 4 Dimensionality Reduction
+			    // NN
+			  // 2 Clustering Algorithms
+			    // NN {Various possibilities}
+
+			
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+		
+		
+	}
+	
+	public static void runExperiments(Filter f) throws Exception {
+		String[] filenames = new String[2];
+		filenames[0] = "/Users/swapnilr/gatech/omscs/ml-7641/letter.arff";
+		filenames[1] = "/Users/swapnilr/gatech/omscs/ml-7641/waveform-5000.arff";
+		int[] sizes = new int[2];
+		sizes[0] = 26;
+		sizes[1] = 3;
+		
+		//f= new RandomProjection();
+		
+		for(int i=0; i < filenames.length - 1; i++) {
+			// Get training data
+			//System.out.println("Running experiments for " + filenames[i] + " with Filter " + f.getClass());
+			//f= new RandomProjection();
+			
+			
+			//if(false) { 
+				AttributeSelection filter = new AttributeSelection();  // package weka.filters.supervised.attribute!
+				InfoGainAttributeEval eval = new InfoGainAttributeEval();
+				Ranker r =new Ranker();
+				r.setNumToSelect(10);
+				//search.setSearchBackwards(true);
+				filter.setEvaluator(eval);
+				filter.setSearch(r);
+			
+			
+			//System.out.println("Running experiments for " + filenames[i] + " with Filter " + filter.getClass());
+			//}
+			BufferedReader reader = new BufferedReader(new FileReader(filenames[i]));
+			ArffReader arff = new ArffReader(reader);
+			Instances trainingData = arff.getData();
+			trainingData.setClassIndex(trainingData.numAttributes() - 1);
+			filter.SelectAttributes(trainingData);
+			trainingData = filter.reduceDimensionality(trainingData);
+			runNeuralNetwork(trainingData);
+			//filter.SelectAttributes(trainingData);
+			//trainingData = filter.reduceDimensionality(trainingData);
+			
+			
+			//f.setInputFormat(trainingData);
+			
+			//trainingData = Filter.useFilter(trainingData, f);
+			if(false) {
+			trainingData.setClassIndex(-1);
+			trainingData.deleteAttributeAt(trainingData.numAttributes() - 1);
+			
+			BufferedReader reader2 = new BufferedReader(new FileReader(filenames[i]));
+			ArffReader arff2 = new ArffReader(reader2);
+			Instances validationData = arff2.getData();
+			validationData.setClassIndex(validationData.numAttributes() - 1);
+			//validationData = Filter.useFilter(validationData, f);
+			//validationData = filter.reduceDimensionality(validationData);
+			
+			runBothClusteringExperiments(trainingData, validationData, sizes[i]);
+			}
+			
+		}
+
+		
+	}
+	
+	public static void runBothClusteringExperiments(Instances trainingData, Instances validationData, int numLabels) throws Exception {
+		AbstractClusterer[] clusterers = new AbstractClusterer[2];
+		SimpleKMeans km = new SimpleKMeans();
+		km.setNumClusters(numLabels);
+		clusterers[0] = km;
+		EM em = new EM();
+		em.setNumClusters(numLabels);
+		clusterers[1] = em;
+		ClusteringExperiment exp;
+		for(AbstractClusterer c: clusterers) {
+			System.out.println("Running Experiment for " + c.getClass() + " with number of labels = " + numLabels);
+			exp = new ClusteringExperiment(c, numLabels);
+			exp.setTiming(true);
+			exp.setSet(validationData);
+			exp.runExperiment(trainingData);
+		}
+	}
+	
+	public static void runNeuralNetwork(Instances data) throws Exception {
+		int index = (int) (data.size()*0.66);
+		Instances trainingSet = new Instances(data, 0, index);
+		Instances testSet = new Instances(data, index, data.size() - index);
+		MultilayerPerceptron nn = new MultilayerPerceptron();
+		nn.setLearningRate(0.3);
+		nn.setTrainingTime(100);
+		nn.buildClassifier(trainingSet);
+		double total = 0;
+		double correct = 0;
+		for(int i=0; i<testSet.size(); i++) {
+			total = total + 1;
+			if(testSet.get(i).classValue() == nn.classifyInstance(testSet.get(i))) {
+				correct = correct + 1;
+			}
+		}
+		
+		System.out.println(correct/total);
+		
+		Evaluation evaluation = new Evaluation(data);
+		evaluation.evaluateModel(nn, data);
+		System.out.println(evaluation.toSummaryString());
+		
+		evaluation = new Evaluation(trainingSet);
+		evaluation.evaluateModel(nn, testSet);
+		System.out.println(evaluation.toSummaryString());
+		
+	}
+	
+	
+	
+}

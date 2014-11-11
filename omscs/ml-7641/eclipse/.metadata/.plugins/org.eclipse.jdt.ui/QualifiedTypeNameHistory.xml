@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<qualifiedTypeNameHistroy>
+<fullyQualifiedTypeName name="shared.DataSetReader"/>
+<fullyQualifiedTypeName name="util.linalg.DenseVector"/>
+<fullyQualifiedTypeName name="shared.DataSet"/>
+<fullyQualifiedTypeName name="shared.Instance"/>
+<fullyQualifiedTypeName name="util.linalg.Vector"/>
+<fullyQualifiedTypeName name="shared.DataSetDescription"/>
+<fullyQualifiedTypeName name="java.util.Arrays"/>
+<fullyQualifiedTypeName name="func.nn.Layer"/>
+<fullyQualifiedTypeName name="func.nn.Neuron"/>
+<fullyQualifiedTypeName name="func.nn.LayeredNetwork"/>
+<fullyQualifiedTypeName name="func.nn.NeuralNetwork"/>
+<fullyQualifiedTypeName name="func.nn.FeedForwardNetwork"/>
+<fullyQualifiedTypeName name="func.nn.FeedForwardLayer"/>
+<fullyQualifiedTypeName name="func.nn.FeedForwardNode"/>
+<fullyQualifiedTypeName name="func.nn.activation.HyperbolicTangentSigmoid"/>
+<fullyQualifiedTypeName name="opt.test.ContinuousPeaksTest"/>
+<fullyQualifiedTypeName name="opt.test.CountOnesTest"/>
+<fullyQualifiedTypeName name="opt.test.FlipFlopTest"/>
+<fullyQualifiedTypeName name="opt.test.KnapsackTest"/>
+<fullyQualifiedTypeName name="opt.test.TravelingSalesmanTest"/>
+<fullyQualifiedTypeName name="opt.test.XORTest"/>
+</qualifiedTypeNameHistroy>

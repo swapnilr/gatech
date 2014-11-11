@@ -1,0 +1,18 @@
+package edu.gatech.ml.assignment3;
+
+import java.io.FileReader;
+
+import weka.clusterers.SimpleKMeans;
+import weka.core.Instances;
+
+public class FirstTest {
+
+	public static void main(String[] args) throws Exception {
+		// TODO Auto-generated method stub
+		SimpleKMeans m = new SimpleKMeans();
+		m.setNumClusters(26);
+		Instances i = new Instances(new FileReader("/Users/swapnilr/gatech/omscs/ml-7641/modifiedLetter.data"));
+		m.buildClusterer(i);
+	}
+
+}

@@ -1,0 +1,32 @@
+package edu.gatech.ml.assignment3;
+
+import java.io.BufferedReader;
+import java.io.FileReader;
+
+import weka.clusterers.SimpleKMeans;
+import weka.core.Instances;
+import weka.core.converters.ArffLoader.ArffReader;
+
+public class MainExperiment {
+
+	public static void main(String[] args) {
+		SimpleKMeans m = new SimpleKMeans();
+		try {
+			m.setNumClusters(26);
+			BufferedReader reader = new BufferedReader(new FileReader("/Users/swapnilr/gatech/omscs/ml-7641/letter.arff"));
+			ArffReader arff = new ArffReader(reader);
+			Instances data = arff.getData();
+			data.deleteAttributeAt(data.numAttributes() - 1);
+			Instances backupData = arff.getData();
+			ClusteringExperiment exp = new ClusteringExperiment(m, 26);
+			exp.setTiming(true);
+			exp.setSet(backupData);
+			//m.buildClusterer(data);
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+	}
+	
+}

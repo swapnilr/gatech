@@ -1,0 +1,88 @@
+package edu.gatech.ml.assignment3;
+
+import java.io.BufferedReader;
+import java.io.FileReader;
+
+import weka.attributeSelection.AttributeSelection;
+import weka.attributeSelection.InfoGainAttributeEval;
+import weka.attributeSelection.Ranker;
+import weka.clusterers.SimpleKMeans;
+import weka.core.Instances;
+import weka.core.converters.ArffLoader.ArffReader;
+
+public class MainExperiment {
+
+	public static void main(String[] args) {
+		SimpleKMeans m = new SimpleKMeans();
+		try {
+			
+			AttributeSelection filter = new AttributeSelection();  // package weka.filters.supervised.attribute!
+			InfoGainAttributeEval eval = new InfoGainAttributeEval();
+			Ranker r =new Ranker();
+			r.setNumToSelect(10);
+			//search.setSearchBackwards(true);
+			filter.setEvaluator(eval);
+			filter.setSearch(r);
+			
+			
+			m.setNumClusters(26);
+			BufferedReader reader = new BufferedReader(new FileReader("/Users/swapnilr/gatech/omscs/ml-7641/letter.arff"));
+			ArffReader arff = new ArffReader(reader);
+			Instances data = arff.getData();
+			BufferedReader reader2 = new BufferedReader(new FileReader("/Users/swapnilr/gatech/omscs/ml-7641/letter.arff"));
+			ArffReader arff2 = new ArffReader(reader2);
+			Instances backupData = arff2.getData();
+			backupData.setClassIndex(backupData.numAttributes() - 1);
+			data.setClassIndex(data.numAttributes() - 1);
+			
+			filter.SelectAttributes(backupData);
+			Instances newData = filter.reduceDimensionality(data);
+			Instances newBackupData = filter.reduceDimensionality(backupData);
+			newData.setClassIndex(-1);
+			newData.deleteAttributeAt(newData.numAttributes() - 1);
+			
+			ClusteringExperiment exp = new ClusteringExperiment(m, 26);
+			exp.setTiming(true);
+			exp.setSet(newBackupData);
+			exp.runExperiment(newData);
+			
+			m = new SimpleKMeans();
+			
+			reader = new BufferedReader(new FileReader("/Users/swapnilr/gatech/omscs/ml-7641/letter.arff"));
+			arff = new ArffReader(reader);
+			data = arff.getData();
+			reader2 = new BufferedReader(new FileReader("/Users/swapnilr/gatech/omscs/ml-7641/letter.arff"));
+			arff2 = new ArffReader(reader2);
+			backupData = arff2.getData();
+			backupData.setClassIndex(backupData.numAttributes() - 1);
+			
+			exp = new ClusteringExperiment(m, 26);
+			exp.setTiming(true);
+			exp.setSet(backupData);
+			exp.runExperiment(data);
+			
+			
+			/*m= new SimpleKMeans();
+			m.setNumClusters(3);
+			reader = new BufferedReader(new FileReader("/Users/swapnilr/gatech/omscs/ml-7641/waveform-5000.arff"));
+			arff = new ArffReader(reader);
+			data = arff.getData();
+			data.deleteAttributeAt(data.numAttributes() - 1);
+			reader2 = new BufferedReader(new FileReader("/Users/swapnilr/gatech/omscs/ml-7641/waveform-5000.arff"));
+			arff2 = new ArffReader(reader2);
+			backupData = arff2.getData();
+			backupData.setClassIndex(backupData.numAttributes() - 1);
+			exp = new ClusteringExperiment(m, 3);
+			exp.setTiming(true);
+			exp.setSet(backupData);
+			exp.runExperiment(data);*/
+			
+			//m.buildClusterer(data);
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+	}
+	
+}

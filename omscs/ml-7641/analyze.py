@@ -1,19 +1,14 @@
-“””
-class Result():
-  def __init__(self):
-    self.T = 0
-    self.N = 0
-    self.count = 0
-    self.result = 0
-
-  def setT(self, t):
-    self.T = t
-
-  def setN(self, n):
-    self.N = n
-
-  def addPoint(self, point):
-“””    
-
-with open(“ProblemsData”) as f:
-  
+with open("ProblemsFourPeaks.txt") as f:
+  with open("FourPeaks.csv", "w") as f2:
+    T = "0"
+    N = "0" 
+    line = f.readline()
+    while line:
+      splits = line.split()
+      if len(splits) == 4:
+        T = splits[2]
+      elif len(splits) == 3:
+        N = splits[2]
+      else:
+        f2.write("%s,%s,%s\n" % (T,N,splits[0]))
+      line = f.readline()

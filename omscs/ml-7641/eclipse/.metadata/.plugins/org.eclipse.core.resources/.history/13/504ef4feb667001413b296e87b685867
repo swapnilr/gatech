@@ -1,0 +1,83 @@
+package edu.gatech.ml.assignment3;
+
+import java.awt.BorderLayout;
+import java.io.BufferedReader;
+import java.io.FileReader;
+
+import weka.attributeSelection.AttributeSelection;
+import weka.attributeSelection.InfoGainAttributeEval;
+import weka.attributeSelection.Ranker;
+import weka.classifiers.functions.MultilayerPerceptron;
+import weka.classifiers.trees.J48;
+import weka.clusterers.SimpleKMeans;
+import weka.core.Instances;
+import weka.core.converters.ArffLoader.ArffReader;
+import weka.filters.Filter;
+import weka.gui.treevisualizer.PlaceNode2;
+import weka.gui.treevisualizer.TreeVisualizer;
+
+public class FirstTest {
+
+	public static void main(String[] args) throws Exception {
+		// TODO Auto-generated method stub
+		SimpleKMeans m = new SimpleKMeans();
+		m.setNumClusters(26);
+		//Instances insts = new Instances(new FileReader("/Users/swapnilr/gatech/omscs/ml-7641/modifiedLetter.data"));
+		//m.buildClusterer(insts);
+		//for(int i=0; i < insts.size(); i++) {
+		//	System.out.println(insts.get(i).classIndex());
+		//}
+		BufferedReader reader = new BufferedReader(new FileReader("/Users/swapnilr/gatech/omscs/ml-7641/letter.arff"));
+		ArffReader arff = new ArffReader(reader);
+		Instances data = arff.getData();
+		data.setClassIndex(data.numAttributes() - 1);
+		MultilayerPerceptron nn = new MultilayerPerceptron();
+		nn.setLearningRate(0.3);
+		nn.setTrainingTime(100);
+		//nn.buildClassifier(data);
+		//data.deleteAttributeAt(data.numAttributes() - 1);
+		//
+		AttributeSelection filter = new AttributeSelection();  // package weka.filters.supervised.attribute!
+		InfoGainAttributeEval eval = new InfoGainAttributeEval();
+		Ranker r =new Ranker();
+		r.setNumToSelect(10);
+		//search.setSearchBackwards(true);
+		filter.setEvaluator(eval);
+		filter.setSearch(r);
+		Instances newData = filter.reduceDimensionality(data);
+		J48 j0 = new J48();
+		j0.setConfidenceFactor((float) 0.25);
+		j0.setMinNumObj(2);
+		j0.buildClassifier(data);
+		double correct = 0;
+		for(int i=0; i < newData.size(); i++) {
+			if (j0.classifyInstance(data.get(i)) == data.get(i).classValue()) {
+				correct += 1;
+			}
+		}
+		//filter.setInputFormat(data);
+		// generate new data
+		//Instances newData = Filter.runFilter(data, filter);
+		J48 j = new J48();
+		j.setConfidenceFactor((float) 0.25);
+		j.setMinNumObj(2);
+		j.buildClassifier(data);
+		
+		correct = 0;
+		for(int i=0; i < data.size(); i++) {
+			if (j.classifyInstance(data.get(i)) == data.get(i).classValue()) {
+				correct += 1;
+			}
+		}
+		System.out.println(j.graphType());
+		//System.out.println(j.graph());
+		
+		//draw(j.graph());
+		System.out.println(correct/data.size());
+		//m.buildClusterer(data);
+		//System.out.println(data.get(0).classValue());
+		//System.out.println(m.clusterInstance(data.get(0)));
+		//m.distributionForInstance(data.get(0));
+	}
+
+}

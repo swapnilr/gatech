@@ -1,0 +1,40 @@
+package edu.gatech.ml.assignment3;
+
+import dist.AbstractConditionalDistribution;
+import shared.DataSet;
+import func.FunctionApproximater;
+
+public class ClusteringExperiment {
+
+	private FunctionApproximater func;
+
+	public ClusteringExperiment(FunctionApproximater func) {
+		this.func = func;
+	}
+	
+	public void runExperiment(DataSet set) {
+		func.estimate(set);
+		printResults(set);
+	}
+	
+	private void printResults(DataSet set) {
+		p(set);
+	}
+	
+	private void p(DataSet set) {
+		int total = 0;
+        int matching = 0;
+        for(int i=0; i<set.size(); i++) {
+        	for(int j=0; j<i; j++) {
+        		if (set.get(i).getLabel().getData().argMax() == set.get(j).getLabel().getData().argMax()) {
+        			total++;
+        			if(((AbstractConditionalDistribution)func).distributionFor(set.get(i)).mode().getDiscrete() == ((AbstractConditionalDistribution)func).distributionFor(set.get(j)).mode().getDiscrete()) {
+        				matching++;
+        			}
+        		}
+        	}        	
+        }
+        System.out.println(((double)matching)/total);
+	}
+	
+}

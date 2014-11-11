@@ -1,0 +1,27 @@
+package edu.gatech.ml.assignment3;
+
+import shared.DataSet;
+import func.FunctionApproximater;
+
+public class ClusteringExperiment {
+
+	private FunctionApproximater func;
+
+	public ClusteringExperiment(FunctionApproximater func) {
+		this.func = func;
+	}
+	
+	public void runExperiment(DataSet set) {
+		func.estimate(set);
+		printResults(set);
+	}
+	
+	private void printResults(DataSet set) {
+		p(set);
+	}
+	
+	private void p(DataSet set) {
+		
+	}
+	
+}

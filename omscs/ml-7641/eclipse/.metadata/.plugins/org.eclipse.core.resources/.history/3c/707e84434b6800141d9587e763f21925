@@ -1,0 +1,18 @@
+package edu.gatech.ml.assignment3;
+
+
+import shared.DataSet;
+import func.KMeansClusterer;
+
+public class ClusteringTests {
+
+	public static void main(String[] args) {
+		String filename = "/Users/swapnilr/gatech/omscs/ml-7641/modifiedLetter.data";
+		ReadDataset reader = new ReadDataset(filename);
+		DataSet set = reader.read();
+		KMeansClusterer k_26 = new KMeansClusterer(26);
+		ClusteringExperiment exp = new ClusteringExperiment(k_26);
+		exp.runExperiment(set);
+	}
+
+}
