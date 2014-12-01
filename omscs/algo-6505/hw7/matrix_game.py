@@ -84,31 +84,21 @@ def rowStrategy(A):
         pa_sum = 0
         for i in range(m):
             pa_sum += p_v[i]*float(A[i][j])
-        #print pa_sum, v
         constraints += [pa_sum >= v]
         
     p_sum = 0
     for i in range(m):
         p_sum += p_v[i]
-        #constraints += [p_v[i] >= 0]
-    #constraints += [ None < p_v[m]]
-    #print p_sum
-    constraints += [p_sum == 1]#, 1 >= p_sum]
-    #print func
-    #print constraints
+    constraints += [p_sum == 1]
     maximize(func)
     st(constraints)
     st(None <= p_v[m])
     solve()
     endModel()
-    #sys.stderr.write(str(np.array([p_v[i].primal for i in range(m+1)])))
-    #sys.stderr.write("\n")
     p = []
     for i in range(m):
         p.append(p_v[i].primal)
     return np.array(p, dtype=float)
-
-    #return n
 
 def main():
     A = np.array([[1,0],
@@ -122,7 +112,6 @@ def main():
 
 if __name__ == '__main__':
     main()
-
 
 
 
