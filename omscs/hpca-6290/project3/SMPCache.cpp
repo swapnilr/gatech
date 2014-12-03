@@ -480,7 +480,7 @@ void SMPCache::access(MemRequest *mreq)
 						 to MemReadW later */
     case MemReadW:
         write(mreq);
-        SMPCache::lastWriter[mreq->getPAddr()] = mreq->getGProcessor()->getId();
+        SMPCache::lastWriter[mreq->getPAddr()] = nodeID;
         break;
     case MemPush:
         I(0);
@@ -510,7 +510,7 @@ void SMPCache::read(MemRequest *mreq)
         } else {
           SMPCache::newBlockCnt[paddr] += 1;
         }
-      } else if(SMPCache::lastWriter[paddr] == mreq->getGProcessor()->getId()) {
+      } else if(SMPCache::lastWriter[paddr] == nodeID) {
         if(SMPCache::ownBlockCnt.count(paddr) == 0) {
           SMPCache::ownBlockCnt[paddr] = 1;
         } else {
