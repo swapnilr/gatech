@@ -1,0 +1,42 @@
+SL3 Neural Networks
+Thresholding function - http://en.wikipedia.org/wiki/Heaviside_step_function
+Refer to Mitchell Section 4.4.1 - Representational Power of Perceptrons
+Sigmoid Function - http://mathworld.wolfram.com/SigmoidFunction.html
+SL 9 Bayesian Learning
+https://docs.google.com/document/d/1sqsXwtce2hqilCX40uEIwvC9kEAQD12tuQ342LjcC0Q/pub
+UL 1 
+Charles Paper on MIMIC - http://www.cc.gatech.edu/~isbell/papers/isbell-mimic-nips-1997.pdf
+UL 4
+This paper(http://www.cs.princeton.edu/picasso/mats/PCA-Tutorial-Intuition_jp.pdf) does a fantastic job building the intuition and implementation behind PCA
+
+An eigenproblem is a computational problem that can be solved by finding the eigenvalues and/or eigenvectors of a matrix. In PCA, we are analyzing the covariance matrix (see the paper for details)
+
+Cocktail Party Demo(http://research.ics.aalto.fi/ica/cocktail/cocktail_en.cgi)
+
+This paper(http://mlsp.cs.cmu.edu/courses/fall2012/lectures/ICA_Hyvarinen.pdf) gives a fairly in-depth look at how the ICA algorithm works. It's long, but comprehensive
+
+ICA has also been applied to the information retrieval problem, in a paper(http://www.cc.gatech.edu/~isbell/papers/isbell-ica-nips-1999.pdf) written by Charles himself
+
+This excellent paper(http://computation.llnl.gov/casc/sapphire/pubs/148494.pdf) is a great resource for the Feature Transformation methods from this course, and beyond
+
+UL 5 Information Theory
+http://www.robotvisions.org/4641/downloads/InfoTheory.fm.pdf
+
+RL 1
+AI: A Modern Approach.(http://aima.cs.berkeley.edu/)
+
+A proof of the convergence of Value Iteration can be found on Slide 25 of these excellent slides(http://www.robotvisions.org/4641/downloads/MDPIntro.pdf)
+
+RL 2 
+A full proof of the convergence of Q-learning, written by the creator of Q-learning, can be found here(http://www.gatsby.ucl.ac.uk/~dayan/papers/cjch.pdf)
+
+This paper(http://www.cs.cmu.edu/afs/cs/project/jair/pub/volume4/kaelbling96a.pdf) offers a summary and an investigation of the field of reinforcement learning. It's long, but chock-full of information!
+
+RL 3 Game Theory
+
+Andrew Moore's slides on Zero-Sum Games(http://www.autonlab.org/tutorials/gametheory.html)
+
+Andrew Moore's slides on Non-Zero-Sum Games(http://www.autonlab.org/tutorials/nonzerosum.html)
+
+RL 4
+ML: it turns out that people tend to be Pavlov-like! A major difference is that people tend to defect when both players defect, indicating they just defect more overall. Check out this paper(http://www.pnas.org/content/93/7/2686.short) for some details
