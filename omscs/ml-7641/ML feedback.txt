@@ -1,0 +1,52 @@
+Assignment 1 Score Report for $Ralhan	Swapnil$
+=======================================
+
+Score: $76$
+
+
+-------------------------------------------
+
+1. Decision Trees
+- Talk about Time required (-4)
+- Talk about Learning rate (-4)
+- Talk about Stopping Criteria (-4)
+
+2. Neural Networks
+- Talk about Cross validation (-4)
+
+3. Boosting
+
+4. SVM 
+- Use of kernels and further explanation (-4)
+
+5. kNN
+- Talk about Time required (-4)
+-------------------------------------------
+
+Randomized Optimization 80/100
+
+Realize that NN uses Gradient Descent to train. When we asked you to use randomized optimization techniques, we would have liked you to analyze using gradient descent as opposed to other techniques.. what's the difference and so on. Hint: Randomized Optimization is usually used for discrete problems while GD works on continuous problems.
+
+Assignment 3 Score Report
+=======================================
+83
+#1 Clustering
+
+---------------------------------------
+#2 Dimensionality Reduction (DR)
+-5 How many features are useful or relevant? 
+
+---------------------------------------
+#3 DR, then Clustering
+
+---------------------------------------
+#4 DR on dataset from Assignment 1 and NN
+
+---------------------------------------
+#5 DR + Clustering, add feature as Cluster O/P and NN 
+-12 was there a change in time? why did you get the results that you did?
+
+Assignment 4 Score Report
+90
+ -5 VI/PI convergence discussion
+--5 exploration v exploitation discussion
