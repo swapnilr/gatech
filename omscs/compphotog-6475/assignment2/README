@@ -1,0 +1,17 @@
+Assignment 2 Testing README:
+
+If you wish to run the test to make sure that your code outputs the correct
+type (reminder: THIS DOES NOT MEAN YOUR FUNCTION IS 'CORRECT', just
+that it outputs the right type of data), input this into a terminal that is
+in the directory of assignment2_test.py:
+	python -m unittest discover -p '*_test.py'
+
+UPDATE: Now that the file has been updated, you may run the following:
+	python ./assignment2_test.py
+
+If you wish to save an image, look at the documentation for cv2.imwrite.
+If you wish to read in an image, look at the documentation for cv2.imread,
+it is also used in assignment2_test.py.
+
+Please feel free to ask any other questions about the assignment on Piazza!
+Remember, ask sooner rather than later :).
