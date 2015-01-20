@@ -64,7 +64,7 @@ def convertToBlackAndWhite(image):
     Returns:
         numpy.ndarray: The black and white image.
     """
-    f = lambda(x): 1 if x > 128 else 0
+    f = lambda(x): np.uint8(255) if x > 128 else np.uint8(0)
     fv = np.vectorize(f)
     return fv(image)
 
@@ -86,7 +86,7 @@ def averageTwoImages(image1, image2):
         numpy.ndarray: The average of image1 and image2.
 
     """
-    return np.mean(np.array([image1,image2]), axis=0, dtype=image1.dtype)
+    return cv2.addWeighted(image1, 0.5, image2, 0.5, 0)
 
 def flipHorizontal(image):
     """ This function flips the input image across the horizontal axis.
@@ -104,4 +104,4 @@ def flipHorizontal(image):
         numpy.ndarray: The horizontally flipped image.
 
     """
-    return np.flipud(image)
+    return np.fliplr(image)
