@@ -18,7 +18,7 @@ class Agent:
     # Do not add any variables to this signature; they will not be used by
     # main().
     def __init__(self):
-        pass
+        self.agent = Agent2x1()
 
     # The primary method for solving incoming Raven's Progressive Matrices.
     # For each problem, your Agent's Solve() method will be called. At the
@@ -45,41 +45,5 @@ class Agent:
     # @return your Agent's answer to this problem
     def Solve(self,problem):
         if problem.getProblemType() == '2x1':
-           agent = Agent2x1()
-           agent.Solve(problem)
+           self.agent.Solve(problem)
         return "5"
-
-    def __solve2x1(self, problem):
-        for objectMap in self.mappings(A.getObjects(), B.getObjects()): 
-            # Add Mapping to nothing, and calculating weights of mappings
-            for newFig in self.__applyMappings(C, self.__getAttrMappings(objectMap)):
-                for option in ["1", "2", "3", "4", "5", "6"]:
-                    if self.__matches(newFig, figures.get(newFig)):
-                        # Later get most likely option, not just perfect option
-                        return option 
-        return "6"
-
-    def __applyMappings(figure, mappings):
-        D = copy.deepcopy(C)
-        for mapping in self.mappings(copy.deepcopy(C), mappings.keys()):
-            yield self.__applyMapping(D, mapping)
-
-    def __applyMapping(obj, mapping):
-        pass
-
-    def __getAttrMappings(objectMap):
-        """
-        Returns:
-            dict[obj] = {attrName: (initValue, finalValue)}
-        """
-        s = {}
-        for object1, object2 in objectMap:
-            betterObj = BetterRavensObject(object2)
-            s[object1] = {}
-            for attr in object1.getAttributes:
-                if betterObj.hasAttr(attr.getName()):
-                    s[object1][attr.getName()] = (attr.getValue(), betterObj.getValue(attr.getName()))
-        return s
-
-    def __matches(figure1, figure2):
-        pass

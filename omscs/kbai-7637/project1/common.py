@@ -18,8 +18,8 @@ __verbosity = Verbosity.WARNING
 def getVerbosity():
     return __verbosity
 
-def setVerbosity(verbosity):
-    __verbosity = verbosity
+def writeAllowed(givenVerbosity):
+    return getVerbosity() <= givenVerbosity
 
 # Since we will need to compute the transformations in order to check their weights, we
 # should just return the transformation itself
@@ -53,21 +53,34 @@ class bcolors():
     BOLD = '\033[1m'
     UNDERLINE = '\033[4m'
 
-def printList(ls, final=''):
-    write = sys.stdout.write
-    for e in ls:
-        print e
-        write("\033[F")
-        time.sleep(1)
-        write("\033[K")
-    write(final)
-    write('\n')
+class ProgressPrinter():
 
+    def __init__(self):
+        self.write = sys.stdout.write
+        self.write("\n")
 
-def testPrint():
-    ls = []
-    ls.append(bcolors.WARNING + "First Test Unsuccessful" + bcolors.ENDC)
-    ls.append(bcolors.WARNING + "Second Test Unsuccessful" + bcolors.ENDC)
-    ls.append(bcolors.WARNING + "Third Test Unsuccessful" + bcolors.ENDC)
-    printList(ls, bcolors.OKGREEN +  bcolors.BOLD + "SUCCESS"+ bcolors.ENDC)
-    printList(ls, bcolors.FAIL +  bcolors.BOLD + "FAIL"+ bcolors.ENDC)
+    def updateProgress(self, text, verbosity=Verbosity.WARNING):
+        if writeAllowed(verbosity):
+            self.write("\033[F")
+            self.write("\033[K")
+            print text
+
+def testPrint2():
+    pp = ProgressPrinter()
+    pp.updateProgress(bcolors.WARNING + "First Test Unsuccessful" + bcolors.ENDC)
+    time.sleep(1)
+    pp.updateProgress(bcolors.WARNING + "Second Test Unsuccessful" + bcolors.ENDC)
+    time.sleep(1)
+    pp.updateProgress(bcolors.WARNING + "Third Test Unsuccessful" + bcolors.ENDC)
+    time.sleep(1)
+    pp.updateProgress(bcolors.OKGREEN + bcolors.BOLD + "SUCCESS" + bcolors.ENDC)
+
+    pp = ProgressPrinter()
+    pp.updateProgress(bcolors.WARNING + "First Test Unsuccessful" + bcolors.ENDC)
+    time.sleep(1)
+    pp.updateProgress(bcolors.WARNING + "Second Test Unsuccessful" + bcolors.ENDC)
+    time.sleep(1)
+    pp.updateProgress(bcolors.WARNING + "Third Test Unsuccessful" + bcolors.ENDC)
+    time.sleep(1)
+    pp.updateProgress(bcolors.FAIL + bcolors.BOLD + "FAIL" + bcolors.ENDC)
+
