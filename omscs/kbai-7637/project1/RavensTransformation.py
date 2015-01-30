@@ -1,4 +1,5 @@
 from BetterRavensObject import BetterRavensObject
+import util
 
 class ObjectTransformation():
     
@@ -14,6 +15,9 @@ class ObjectTransformation():
                     transformation = self.object1[key]
                     if value != transformation:
                         self.transformations[key] = (value, transformation)
+            for key, value in self.object1:
+                if key not in self.object0:
+                    self.transformations[key] = (None, value)
 
     def __str__(self):
         string = "Object 1 - %s\nObject 2 - %s" % (
@@ -22,6 +26,11 @@ class ObjectTransformation():
             string = "%s\nTransformations%s" % (string, str(self.getTransformations()))
         return string
 
+    def __eq__(self, other):
+        return self.getTransformations() == other.getTransformations()
+
+    def __ne__(self, other):
+        return not self == other
 
     def getTransformations(self):
         if not self.transform:
@@ -34,7 +43,7 @@ class ObjectTransformation():
         elif index == 1:
             return self.object1
         else:
-            raise exception.IndexError("Only 2 objects present")
+            raise IndexError("Only 2 objects present")
 
 class FigureTransformation():
 
@@ -49,12 +58,28 @@ class FigureTransformation():
     def get(self, obj):
         return self.objTransMap[obj]
 
+    def getObjectNames(self):
+        return self.objTransMap.keys()
+
     def __iter__(self):
         return self.objTransMap.iteritems()
 
     def __str__(self):
-        string = "Figure %s" % (obj)
+        string = "Figure: \n"
         for name, otf in self:
             string = "%s\n%s" %(string, otf)
         return string
 
+    def __eq__(self, other):
+        for combination in util.pairs(self.getObjectNames(), other.getObjectNames()):
+            match = True
+            for pair in combination:
+                if self.get(pair[0]) != other.get(pair[1]):
+                    match = False
+                    break
+            if match:
+                return match
+        return False
+
+    def __ne__(self, other):
+        return not self == other

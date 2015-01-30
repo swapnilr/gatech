@@ -19,27 +19,17 @@ class Agent2x1():
         # A to C = Object to object map MAC[C_obj] = A_obj
         # C -> D : MAB[MAC[C_obj]] -> {attr:transformation}. Apply to C to get D
         # Match D to 1 through 6. Compare objects and each attribute
-        for transformations in common.mappings(A.getObjects(), B.getObjects()):
-            for A_name, A_otf in transformations:
-                #print transformations[A_name] # Add verbose flag + create printing utilities
-                #d = common.mappings(A.getObjects(), C.getObjects(), getTransformations=False)
-                #for mapping in d:
-                #    for key in mapping:
-                #        print mapping[key]
-                original_transformation = A_otf.getTransformations()
-                for test in ["1", "2", "3", "4", "5", "6"]:
-                    testFig = figures.get(test)
-                    for ftf in common.mappings(C.getObjects(), testFig.getObjects()):
-                        for name, otf in ftf:
-                            test_trans = otf.getTransformations()
-                            if test_trans == original_transformation:
-                                #print "Gonna guess %s" % test
-                                answer = problem.checkAnswer(test)
-                                if answer != test:
-                                    print "Name - %s, Answer - %s, Guess - %s" % (
-                                        problem.getName(), problem.checkAnswer(test), test)
-                                return test
+        for AB_ftf in common.mappings(A.getObjects(), B.getObjects()):
+            for testName in ["1", "2", "3", "4", "5", "6"]:
+                testFigure = figures.get(testName)
+                for CD_ftf in common.mappings(C.getObjects(), testFigure.getObjects()):
+                    if AB_ftf == CD_ftf:
+                        answer = problem.checkAnswer(testName)
+                        if answer != testName:
+                            print "Name - %s, Answer - %s, Guess - %s" % (
+                                    problem.getName(), answer, testName)
+                            # Print AB_ftf, CD_ftf
+                        return testName
         print "Name - %s, Answer - %s, Couldn't Guess!!" % (
             problem.getName(), problem.checkAnswer(""))
         return ""
-#TODO: Bug: Checks only transformations for one object, check for all!, probably need to add some sub-routines

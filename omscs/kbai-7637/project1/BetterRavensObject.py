@@ -8,6 +8,9 @@ class BetterRavensObject():
     def __eq__(self, other):
         return self.attributes == other.getAttributes()
 
+    def __ne__(self, other):
+        return not self == other
+
     def __getitem__(self, item):
         return self.attributes[item]
 
