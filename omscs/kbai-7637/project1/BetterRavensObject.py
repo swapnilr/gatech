@@ -17,6 +17,9 @@ class BetterRavensObject():
     def __contains__(self, item):
         return item in self.attributes
 
+    def __iter__(self):
+        return self.getAttributes().iteritems()
+
     def getAttributes(self):
         return self.attributes
 

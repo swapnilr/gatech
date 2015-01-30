@@ -3,6 +3,7 @@
 
 import time
 import sys
+from RavensTransformation import RavensTransformation
 
 class Verbosity():
     NONE = -1
@@ -19,10 +20,30 @@ def getVerbosity():
 def setVerbosity(verbosity):
     __verbosity = verbosity
 
+# Since we will need to compute the transformations in order to check their weights, we
+# should just return the transformation itself
 # We return a list of tuples, where the first element of the tuple is an object from
 # x and the second element of the tuple is an object from y
-def mappings(x, y):
-    return [zip(x, perm) for perm in itertools.permutations(y)]
+# TODO: For now this simply generates all combinations in a random order.
+# Iteration 1: Add basic weights, so transformation from one object to another has a weight
+#              and the weight of a particular mapping is the sum of weights of each object
+#              to object mapping. A single transformation can be the sum or product of mapping
+#              of individual attribute changes(depending on the attribute and the extent of
+#              the change.
+# Iteration 2: Add deletion.
+# Iteration 3: Add 1 to Many mapping - Extrapolation/Addition. Cost of extrapolation should depend 
+#              on what the new objects look like
+# Iteration 4: Add Many to 1 mapping - Aggregation
+def mappings(x, y, getTransformations=True):
+    mappings = [zip(x, perm) for perm in itertools.permutations(y)]
+    for mapping in mappings:
+        if not getTransformations:
+            yield mapping
+        else:
+            transformationList = []
+            for objectMap in mapping:
+                transformationList.append(RavensTransformation(objectMap))
+            yield transformationList
 
 class bcolors():
     HEADER = '\033[95m'

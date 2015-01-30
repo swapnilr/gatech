@@ -43,5 +43,10 @@ class TestBetterRavensObject(unittest.TestCase):
         bro['shape'] = 'square'
         assert(bro == otherBro)
 
+    def testIter(self):
+        bro = BetterRavensObject(self.RO)
+        for key, value in bro:
+            assert(bro[key] == value)
+
 if __name__ == '__main__':
     unittest.main()

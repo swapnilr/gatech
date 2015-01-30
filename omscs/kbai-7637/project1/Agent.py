@@ -11,21 +11,6 @@ import itertools
 import copy
 from Agent2x1 import Agent2x1
 
-DEBUG = 0
-PROD = 1
-
-class BetterRavensObject:
-    def __init__(self, RO):
-      attrs = {}
-      for attr in RO.getAttributes():
-          attrs[attr.getName()] = attr.getValue()
-
-    def hasAttr(self, name):
-        return attrs.has_key(name)
-
-    def getValue(self, name):
-        return attrs[name]
-
 class Agent:
     # The default constructor for your Agent. Make sure to execute any
     # processing necessary before your Agent starts solving problems here.
@@ -33,7 +18,7 @@ class Agent:
     # Do not add any variables to this signature; they will not be used by
     # main().
     def __init__(self):
-        self.verbosity = DEBUG
+        pass
 
     # The primary method for solving incoming Raven's Progressive Matrices.
     # For each problem, your Agent's Solve() method will be called. At the
@@ -65,12 +50,6 @@ class Agent:
         return "5"
 
     def __solve2x1(self, problem):
-        if self.verbosity == DEBUG:
-          print "Trying %s" % problem.getName()
-        figures = problem.getFigures()
-        A = figures.get("A")
-        B = figures.get("B")
-        C = figures.get("C")
         for objectMap in self.mappings(A.getObjects(), B.getObjects()): 
             # Add Mapping to nothing, and calculating weights of mappings
             for newFig in self.__applyMappings(C, self.__getAttrMappings(objectMap)):
