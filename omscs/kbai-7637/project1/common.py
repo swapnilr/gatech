@@ -4,6 +4,7 @@
 import time
 import sys
 from RavensTransformation import RavensTransformation
+import itertools
 
 class Verbosity():
     NONE = -1
@@ -37,13 +38,10 @@ def setVerbosity(verbosity):
 def mappings(x, y, getTransformations=True):
     mappings = [zip(x, perm) for perm in itertools.permutations(y)]
     for mapping in mappings:
-        if not getTransformations:
-            yield mapping
-        else:
-            transformationList = []
-            for objectMap in mapping:
-                transformationList.append(RavensTransformation(objectMap))
-            yield transformationList
+        transformations = {}
+        for objectMap in mapping:
+            transformations[objectMap[0].getName()] = RavensTransformation(objectMap, transform=getTransformations)
+        yield transformations
 
 class bcolors():
     HEADER = '\033[95m'

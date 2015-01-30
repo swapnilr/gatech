@@ -20,6 +20,9 @@ class BetterRavensObject():
     def __iter__(self):
         return self.getAttributes().iteritems()
 
+    def __str__(self):
+        return "%s - %s" % (str(self.getName()), str(self.getAttributes())) 
+
     def getAttributes(self):
         return self.attributes
 
