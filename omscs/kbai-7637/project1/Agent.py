@@ -7,6 +7,23 @@
 # def Solve(self,problem)
 #
 # These methods will be necessary for the project's main method to run.
+import itertools
+
+DEBUG = 0
+PROD = 1
+
+class BetterRavensObject:
+    def __init__(self, RO):
+      attrs = {}
+      for attr in RO.getAttributes():
+          attrs[attr.getName()] = attr.getValue()
+
+    def hasAttr(self, name):
+        return attrs.has_key(name)
+
+    def getValue(self, name):
+        return attrs[name]
+
 class Agent:
     # The default constructor for your Agent. Make sure to execute any
     # processing necessary before your Agent starts solving problems here.
@@ -14,7 +31,7 @@ class Agent:
     # Do not add any variables to this signature; they will not be used by
     # main().
     def __init__(self):
-        pass
+        self.verbosity = DEBUG
 
     # The primary method for solving incoming Raven's Progressive Matrices.
     # For each problem, your Agent's Solve() method will be called. At the
@@ -40,4 +57,51 @@ class Agent:
     # @param problem the RavensProblem your agent should solve
     # @return your Agent's answer to this problem
     def Solve(self,problem):
+        if problem.getProblemType() == '2x1':
+           self.__solve2x1(problem)
+        return "5"
+
+    def __solve2x1(self, problem):
+        if self.verbosity == DEBUG:
+          print "Trying %s" % problem.getName()
+        figures = problem.getFigures()
+        A = figures.get("A")
+        B = figures.get("B")
+        C = figures.get("C")
+        count = 0
+        for objectMap in self.mappings(A.getObjects(), B.getObjects()): 
+            # Add Mapping to nothing, and calculating weights of mappings
+            count += 1
+            newFig = __applyMappings(C, __getAttrMappings(objectMap))
+            for option in ["1", "2", "3", "4", "5", "6"]:
+                if __matches(newFig, figures.get(newFig)):
+                    # Later get most likely option, not just perfect option
+                    return option 
+        print count
         return "6"
+
+    def mappings(x, y):
+        # We return a list of tuples, where the first element of the tuple is
+        # an object from x and the second element of the tuple is an object from
+        # y
+        return [zip(x, perm) for perm in itertools.permutations(y)]  
+
+    def __applyMappings(figure, mappings):
+        pass
+
+    def __getAttrMappings(objectMap):
+        """
+        Returns:
+            dict[obj] = {attrName: (initValue, finalValue)}
+        """
+        s = {}
+        for object1, object2 in objectMap:
+            betterObj = BetterRavensObject(object2)
+            s[object1] = {}
+            for attr in object1.getAttributes:
+                if betterObj.hasAttr(attr.getName()):
+                    s[object1][attr.getName()] = (attr.getValue(), betterObj.getValue(attr.getName()))
+        return s
+
+    def __matches(figure1, figure2):
+        pass
