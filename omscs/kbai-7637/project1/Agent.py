@@ -60,36 +60,25 @@ class Agent:
     # @return your Agent's answer to this problem
     def Solve(self,problem):
         if problem.getProblemType() == '2x1':
-           self.__solve2x1(problem)
+           agent = Agent2x1()
+           agent.Solve(problem)
         return "5"
 
     def __solve2x1(self, problem):
-        agent = Agent2x1()
-        agent.Solve(problem)
         if self.verbosity == DEBUG:
           print "Trying %s" % problem.getName()
         figures = problem.getFigures()
         A = figures.get("A")
         B = figures.get("B")
         C = figures.get("C")
-        count = 0
-        return "6"
         for objectMap in self.mappings(A.getObjects(), B.getObjects()): 
             # Add Mapping to nothing, and calculating weights of mappings
-            count += 1
             for newFig in self.__applyMappings(C, self.__getAttrMappings(objectMap)):
                 for option in ["1", "2", "3", "4", "5", "6"]:
                     if self.__matches(newFig, figures.get(newFig)):
                         # Later get most likely option, not just perfect option
                         return option 
-        print count
         return "6"
-
-    def mappings(x, y):
-        # We return a list of tuples, where the first element of the tuple is
-        # an object from x and the second element of the tuple is an object from
-        # y
-        return [zip(x, perm) for perm in itertools.permutations(y)]  
 
     def __applyMappings(figure, mappings):
         D = copy.deepcopy(C)

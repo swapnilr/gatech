@@ -1,6 +1,9 @@
 # Put printing utilies, weights, mappings etc here
 # Can possibly use import curses, but might be a lot more complicated than necessary
 
+import time
+import sys
+
 class Verbosity():
     NONE = -1
     DEBUG = 0 # Prints details of failed connections as well
@@ -16,23 +19,10 @@ def getVerbosity():
 def setVerbosity(verbosity):
     __verbosity = verbosity
 
+# We return a list of tuples, where the first element of the tuple is an object from
+# x and the second element of the tuple is an object from y
 def mappings(x, y):
     return [zip(x, perm) for perm in itertools.permutations(y)]
-
-# Have debug mode etc specified on the command line possibly(default it to non-verbose
-def showTimes():
-    import time
-    from datetime import datetime
-    import sys
-
-    write = sys.stdout.write
-
-    for i in range(10):
-        s = str(datetime.now())
-        print s
-        write("\033[F")
-        time.sleep(1)
-    write('\n')
 
 class bcolors():
     HEADER = '\033[95m'
@@ -45,7 +35,6 @@ class bcolors():
     UNDERLINE = '\033[4m'
 
 def printList(ls, final=''):
-    import time, sys
     write = sys.stdout.write
     for e in ls:
         print e
