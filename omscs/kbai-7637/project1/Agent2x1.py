@@ -21,9 +21,24 @@ class Agent2x1():
         # Match D to 1 through 6. Compare objects and each attribute
         for transformations in common.mappings(A.getObjects(), B.getObjects()):
             for A_name in transformations:
-                print transformations[A_name]
-                d = common.mappings(A.getObjects(), C.getObjects(), getTransformations=False)
-                for mapping in d:
-                    for key in mapping:
-                        print mapping[key]
-        return "6"
+                #print transformations[A_name] # Add verbose flag + create printing utilities
+                #d = common.mappings(A.getObjects(), C.getObjects(), getTransformations=False)
+                #for mapping in d:
+                #    for key in mapping:
+                #        print mapping[key]
+                original_transformation = transformations[A_name].getTransformations()
+                for test in ["1", "2", "3", "4", "5", "6"]:
+                    testFig = figures.get(test)
+                    for tt in common.mappings(C.getObjects(), testFig.getObjects()):
+                        for C_name in tt:
+                            test_trans = tt[C_name].getTransformations()
+                            if test_trans == original_transformation:
+                                #print "Gonna guess %s" % test
+                                answer = problem.checkAnswer(test)
+                                if answer != test:
+                                    print "Name - %s, Answer - %s, Guess - %s" % (
+                                        problem.getName(), problem.checkAnswer(test), test)
+                                return test
+        print "Name - %s, Answer - %s, Couldn't Guess!!" % (
+            problem.getName(), problem.checkAnswer(""))
+        return ""
