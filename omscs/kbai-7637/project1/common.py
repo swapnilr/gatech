@@ -3,7 +3,8 @@
 
 import time
 import sys
-from RavensTransformation import RavensTransformation
+from RavensTransformation import ObjectTransformation
+from RavensTransformation import FigureTransformation
 import itertools
 
 class Verbosity():
@@ -39,9 +40,13 @@ def mappings(x, y, getTransformations=True):
     mappings = [zip(x, perm) for perm in itertools.permutations(y)]
     for mapping in mappings:
         transformations = {}
+        ftf = FigureTransformation()
         for objectMap in mapping:
-            transformations[objectMap[0].getName()] = RavensTransformation(objectMap, transform=getTransformations)
-        yield transformations
+            name = objectMap[0].getName()
+            otf = ObjectTransformation(objectMap, transform=getTransformations)
+            ftf.add(name, otf)
+            transformations[objectMap[0].getName()] = ObjectTransformation(objectMap, transform=getTransformations)
+        yield ftf
 
 class bcolors():
     HEADER = '\033[95m'

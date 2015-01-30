@@ -1,6 +1,6 @@
 from BetterRavensObject import BetterRavensObject
 
-class RavensTransformation():
+class ObjectTransformation():
     
     def __init__(self, objectMap, transform=True):
         self.object0 = BetterRavensObject(objectMap[0])
@@ -35,3 +35,26 @@ class RavensTransformation():
             return self.object1
         else:
             raise exception.IndexError("Only 2 objects present")
+
+class FigureTransformation():
+
+    def __init__(self):
+        self.objTransMap = {}
+
+    def add(self, obj, transformation):
+        assert(isinstance(obj, str))
+        assert(isinstance(transformation, ObjectTransformation))
+        self.objTransMap[obj] = transformation
+
+    def get(self, obj):
+        return self.objTransMap[obj]
+
+    def __iter__(self):
+        return self.objTransMap.iteritems()
+
+    def __str__(self):
+        string = "Figure %s" % (obj)
+        for name, otf in self:
+            string = "%s\n%s" %(string, otf)
+        return string
+
