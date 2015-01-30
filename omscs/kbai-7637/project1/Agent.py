@@ -8,6 +8,8 @@
 #
 # These methods will be necessary for the project's main method to run.
 import itertools
+import copy
+from Agent2x1 import Agent2x1
 
 DEBUG = 0
 PROD = 1
@@ -62,6 +64,8 @@ class Agent:
         return "5"
 
     def __solve2x1(self, problem):
+        agent = Agent2x1()
+        agent.Solve(problem)
         if self.verbosity == DEBUG:
           print "Trying %s" % problem.getName()
         figures = problem.getFigures()
@@ -69,14 +73,15 @@ class Agent:
         B = figures.get("B")
         C = figures.get("C")
         count = 0
+        return "6"
         for objectMap in self.mappings(A.getObjects(), B.getObjects()): 
             # Add Mapping to nothing, and calculating weights of mappings
             count += 1
-            newFig = __applyMappings(C, __getAttrMappings(objectMap))
-            for option in ["1", "2", "3", "4", "5", "6"]:
-                if __matches(newFig, figures.get(newFig)):
-                    # Later get most likely option, not just perfect option
-                    return option 
+            for newFig in self.__applyMappings(C, self.__getAttrMappings(objectMap)):
+                for option in ["1", "2", "3", "4", "5", "6"]:
+                    if self.__matches(newFig, figures.get(newFig)):
+                        # Later get most likely option, not just perfect option
+                        return option 
         print count
         return "6"
 
@@ -87,6 +92,11 @@ class Agent:
         return [zip(x, perm) for perm in itertools.permutations(y)]  
 
     def __applyMappings(figure, mappings):
+        D = copy.deepcopy(C)
+        for mapping in self.mappings(copy.deepcopy(C), mappings.keys()):
+            yield self.__applyMapping(D, mapping)
+
+    def __applyMapping(obj, mapping):
         pass
 
     def __getAttrMappings(objectMap):
