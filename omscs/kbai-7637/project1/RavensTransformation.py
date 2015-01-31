@@ -75,14 +75,15 @@ class LocationTransformation(AttributeTransformation):
 
 class OrientationTransformation(AttributeTransformation):
     
-    def __init__(self, key, initial_value, final_value, shape):
+    def __init__(self, key, initial_value, final_value, shape, flips):
         super(OrientationTransformation, self).__init__(key, initial_value, final_value)
-        self.shape = Shape.getShape(shape, initial_value, final_value)
+        self.shape = Shape.getShape(shape, initial_value, final_value, flips)
 
     def __eq__(self, other):
         bothVerticallyReflected = (self.shape.isVerticallyReflected() and other.shape.isVerticallyReflected())
         bothHorizontallyReflected = (self.shape.isHorizontallyReflected() and other.shape.isHorizontallyReflected())
         sameRotationAngle = (other.shape.getEquivalentRotationAngle(self.shape.getRotationAngle()) == self.shape.getEquivalentRotationAngle(other.shape.getRotationAngle()))
+        #print bothVerticallyReflected, bothHorizontallyReflected, sameRotationAngle
         return bothVerticallyReflected or bothHorizontallyReflected or sameRotationAngle
 
 
@@ -99,7 +100,15 @@ class ObjectTransformation():
                 if key in self.object1:
                     transformation = self.object1[key]
                     if key == 'angle':
-                        self.transformations[key] = OrientationTransformation(key, int(value), int(transformation), shape=self.object0['shape'])
+                        o0flip = False
+                        o1flip = False
+                        if 'vertical-flip' in self.object0 and self.object0['vertical-flip'] == 'yes':
+                            o0flip = True
+                        if 'vertical-flip' in self.object1 and self.object1['vertical-flip'] == 'yes':
+                            o1flip = True
+                        self.transformations['orientation'] = OrientationTransformation(key, int(value), int(transformation), shape=self.object0['shape'], flips=(o0flip, o1flip))
+                    elif key == 'vertical-flip':
+                        pass
                     elif value != transformation: # Add special case for orientation
                         self.transformations[key] = self.getTransformation(key, value, transformation)
             for key, value in self.object1:

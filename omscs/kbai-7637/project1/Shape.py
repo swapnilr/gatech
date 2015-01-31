@@ -1,4 +1,5 @@
-def getShape(shape, initial_angle, final_angle):
+def getShape(shape, initial_angle, final_angle, flips=(False, False)):
+    #TODO: Use flips
     if shape == 'arrow':
         return Arrow(initial_angle, final_angle)
     elif shape == 'circle':
@@ -37,7 +38,12 @@ class Shape(object):
         return angle % self.completeRotation
 
 class Arrow(Shape):
-    pass
+    
+    def isVerticallyRelfected(self):
+        return self.getRotationAngle() % self.halfRotation == 0
+
+    def isHorizontallyReflected(self):
+        return self.getRotationAngle() == 0
 
 
 class Circle(Shape):
@@ -60,9 +66,16 @@ class Rectangle(Shape):
         super(Rectangle, self).__init__(initial_angle, final_angle, complete_rotation, half_rotation)
 
 class HalfArrow(Shape):
-    pass
+
+    def __init__(self, initial_angle, final_angle, complete_rotation=360, half_rotation=360):
+        super(HalfArrow, self).__init__(initial_angle, final_angle, complete_rotation, half_rotation)
 
 class PacMan(Shape):
-    pass
+    #pass 
+    #def isVerticallyRelfected(self):
+    #    return self.getRotationAngle() % self.halfRotation == 0
+
+    def isHorizontallyReflected(self):
+        return self.getRotationAngle() % self.halfRotation == 0 and not self.isVerticallyReflected()
 
 
