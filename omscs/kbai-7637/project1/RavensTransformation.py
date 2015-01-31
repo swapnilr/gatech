@@ -1,7 +1,7 @@
 from BetterRavensObject import BetterRavensObject
 import util
 
-class AttributeTransformation():
+class AttributeTransformation(object):
     
     def __init__(self, key, initial_value, final_value):
         self.key = key
@@ -15,7 +15,7 @@ class AttributeTransformation():
         return not self == other
 
     def __str__(self):
-        return "(%s, %s)" %(initial_value, final_value)
+        return "(%s, %s)" %(self.initial_value, self.final_value)
 
 
 class FillTransformation(AttributeTransformation):
@@ -32,6 +32,9 @@ class FillTransformation(AttributeTransformation):
         else:
             valueList = [value]
         val = 0
+        # Values here are a bitwise representation, where quadrant I is 1, quadrant II is 10(binary)
+        # quadrant III is 100 and quadrant IV is 1000. The fill is thus a bitwise or based on which
+        # quadrants are filled
         for fill in valueList:
             if fill == 'no':
                 val |= 0
@@ -64,12 +67,16 @@ class FillTransformation(AttributeTransformation):
             return other.final_value == self.final_value | other.initial_value
         return self.key == other.key and self.initial_value == other.initial_value and self.final_value == other.final_value
 
+
 class LocationTransformation(AttributeTransformation):
     pass
 
 
 class OrientationTransformation(AttributeTransformation):
-    pass
+    
+    def __init__(self, key, initial_value, final_value, shape):
+        super(OrientationTransformation, self).__init__(key, initial_value, final_value)
+        self.shape = shape
 
 
 # Object Transformation is of 2 types: Relational and structural
@@ -84,23 +91,29 @@ class ObjectTransformation():
             for key, value in self.object0:
                 if key in self.object1:
                     transformation = self.object1[key]
-                    if key == 'fill':
-                        self.transformations[key] = FillTransformation(key, value, transformation)
-                    elif value != transformation:
-                        self.transformations[key] = AttributeTransformation(key, value, transformation)
-
+                    if key == 'angle':
+                        self.transformations[key] = OrientationTransformation(key, value, transformation, shape=self.object0['shape'])
+                    elif value != transformation: # Add special case for orientation
+                        self.transformations[key] = self.getTransformation(key, value, transformation)
             for key, value in self.object1:
                 if key not in self.object0:
-                    if key == 'fill':
-                        self.transformations[key] = FillTransformation(key, None, value)
-                    else:
-                        self.transformations[key] = AttributeTransformation(key, None, value)
+                    self.transformations[key] = self.getTransformation(key, None, value)
+
+    
+    def getTransformation(self, key, initial_value, final_value):
+        if key == 'fill':
+            return FillTransformation(key, initial_value, final_value)
+        else:
+            return AttributeTransformation(key, initial_value, final_value)
 
     def __str__(self):
         string = "Object 1 - %s\nObject 2 - %s" % (
                 str(self.getObject(0)), str(self.getObject(1)))
         if self.transform:
-            string = "%s\nTransformations%s" % (string, str(self.getTransformations()))
+            string = "%s\nTransformations - {" % string
+            for key, value in self.getTransformations().iteritems():
+                string = "%s %s: %s," %(string, str(key), str(value))
+            string = "%s}" % string
         return string
 
     def __eq__(self, other):
