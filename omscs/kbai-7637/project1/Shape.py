@@ -18,35 +18,46 @@ def getShape(shape, initial_angle, final_angle):
 
 class Shape(object):
 
-    def __init__(self, initial_angle, final_angle):
+    def __init__(self, initial_angle, final_angle, complete_rotation=360, half_rotation=180):
         self.initial_angle = initial_angle
         self.final_angle = final_angle
+        self.completeRotation = complete_rotation
+        self.halfRotation = half_rotation
 
     def isVerticallyReflected(self):
         return self.getRotationAngle() == 0
 
     def isHorizontallyReflected(self):
-        return self.getRotationAngle() % 180 == 0
+        return self.getRotationAngle() % self.halfRotation == 0
 
     def getRotationAngle(self):
-        return abs(self.final_angle - self.initial_angle) % 360
+        return abs(self.final_angle - self.initial_angle) % self.completeRotation
 
+    def getEquivalentRotationAngle(self, angle):
+        return angle % self.completeRotation
 
 class Arrow(Shape):
     pass
 
 
 class Circle(Shape):
-    pass
+   
+    def __init__(self, initial_angle, final_angle, complete_rotation=1, half_rotation=1):
+        super(Circle, self).__init__(initial_angle, final_angle, complete_rotation, half_rotation)
+
 
 class Triangle(Shape):
     pass
 
 class Plus(Shape):
-    pass
+
+    def __init__(self, initial_angle, final_angle, complete_rotation=90, half_rotation=90):
+        super(Plus, self).__init__(initial_angle, final_angle, complete_rotation, half_rotation)
 
 class Rectangle(Shape):
-    pass
+
+    def __init__(self, initial_angle, final_angle, complete_rotation=180, half_rotation=180):
+        super(Rectangle, self).__init__(initial_angle, final_angle, complete_rotation, half_rotation)
 
 class HalfArrow(Shape):
     pass

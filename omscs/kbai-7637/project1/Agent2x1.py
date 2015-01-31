@@ -28,8 +28,8 @@ class Agent2x1():
                         if answer != testName:
                             print "Name - %s, Answer - %s, Guess - %s" % (
                                     problem.getName(), answer, testName)
-                            print AB_ftf
-                            print CD_ftf
+                            #print AB_ftf
+                            #print CD_ftf
                         return testName
         print "Name - %s, Answer - %s, Couldn't Guess!!" % (
             problem.getName(), problem.checkAnswer(""))

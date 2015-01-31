@@ -82,7 +82,7 @@ class OrientationTransformation(AttributeTransformation):
     def __eq__(self, other):
         bothVerticallyReflected = (self.shape.isVerticallyReflected() and other.shape.isVerticallyReflected())
         bothHorizontallyReflected = (self.shape.isHorizontallyReflected() and other.shape.isHorizontallyReflected())
-        sameRotationAngle = (self.shape.getRotationAngle() == other.shape.getRotationAngle())
+        sameRotationAngle = (other.shape.getEquivalentRotationAngle(self.shape.getRotationAngle()) == self.shape.getEquivalentRotationAngle(other.shape.getRotationAngle()))
         return bothVerticallyReflected or bothHorizontallyReflected or sameRotationAngle
 
 
