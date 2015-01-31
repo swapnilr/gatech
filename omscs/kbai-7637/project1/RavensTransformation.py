@@ -17,6 +17,61 @@ class AttributeTransformation():
     def __str__(self):
         return "(%s, %s)" %(initial_value, final_value)
 
+
+class FillTransformation(AttributeTransformation):
+    
+    def __init__(self, key, initial_value, final_value):
+        self.key = key
+        self.initial_value = self.cleaned(initial_value)
+        self.final_value = self.cleaned(final_value)
+
+    def cleaned(self, value):
+        valueList = []
+        if ',' in value:
+            valueList = value.split(',')
+        else:
+            valueList = [value]
+        val = 0
+        for fill in valueList:
+            if fill == 'no':
+                val |= 0
+            elif fill == 'yes':
+                val |= 15
+            elif fill == 'left-half':
+                val |= 6
+            elif fill == 'top-half':
+                val |= 3
+            elif fill == 'right-half':
+                val |= 9
+            elif fill == 'bottom-half':
+                val |= 12
+            elif fill == 'top-left':
+                val |= 2
+            elif fill == 'bottom-left':
+                val |= 4
+            elif fill == 'top-right':
+                val |= 1
+            elif fill == 'bottom-right':
+                val |= 8
+        return val
+
+    def __eq__(self, other):
+        if self.initial_value != 0:
+            #TODO: Solve this
+            pass
+        else:
+            #TODO: Can be things other than or
+            return other.final_value == self.final_value | other.initial_value
+        return self.key == other.key and self.initial_value == other.initial_value and self.final_value == other.final_value
+
+class LocationTransformation(AttributeTransformation):
+    pass
+
+
+class OrientationTransformation(AttributeTransformation):
+    pass
+
+
 # Object Transformation is of 2 types: Relational and structural
 class ObjectTransformation():
     
@@ -29,11 +84,17 @@ class ObjectTransformation():
             for key, value in self.object0:
                 if key in self.object1:
                     transformation = self.object1[key]
-                    if value != transformation:
+                    if key == 'fill':
+                        self.transformations[key] = FillTransformation(key, value, transformation)
+                    elif value != transformation:
                         self.transformations[key] = AttributeTransformation(key, value, transformation)
+
             for key, value in self.object1:
                 if key not in self.object0:
-                    self.transformations[key] = AttributeTransformation(key, None, value)
+                    if key == 'fill':
+                        self.transformations[key] = FillTransformation(key, None, value)
+                    else:
+                        self.transformations[key] = AttributeTransformation(key, None, value)
 
     def __str__(self):
         string = "Object 1 - %s\nObject 2 - %s" % (
