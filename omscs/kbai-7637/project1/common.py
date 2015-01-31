@@ -34,13 +34,23 @@ def writeAllowed(givenVerbosity):
 #              and the weight of a particular mapping is the sum of weights of each object
 #              to object mapping. A single transformation can be the sum or product of mapping
 #              of individual attribute changes(depending on the attribute and the extent of
-#              the change.
-# Iteration 2: Add deletion.
-# Iteration 3: Add 1 to Many mapping - Extrapolation/Addition. Cost of extrapolation should depend 
-#              on what the new objects look like
+#              the change. Sometimes location is more important, other times shape matching is more
+#              important.
+# Iteration 3: Add support for moving things around intelligently(understands above vs below etc)
+# Iteration 3: Add 1 to Many mapping - Extrapolation/Addition. Cost of extrapolation should 
+#              depend on what the new objects look like
 # Iteration 4: Add Many to 1 mapping - Aggregation
+# Add Shapes and shape properties(such as rotating a circle is possible with it remaining the same)
+# Or invarianze to reflection. Also properties such as reflection/angle/orientation should have it's own
+# handler
 def mappings(x, y, getTransformations=True):
-    mappings = util.pairs(x, y)
+    tempy = y
+    if len(y) < len(x):
+        tempy.extend([None]*(len(x) - len(y)))
+    mappings = util.pairs(x, tempy)
+    if len(x) < len(y):
+        mappings = util.extended_pairs(x, y)
+        # Mappings defined as follows: Given x=[1], y=[1,2], we want
     for mapping in mappings:
         ftf = FigureTransformation()
         for objectMap in mapping:

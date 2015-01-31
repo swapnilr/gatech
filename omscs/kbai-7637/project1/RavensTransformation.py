@@ -1,6 +1,7 @@
 from BetterRavensObject import BetterRavensObject
 import util
 
+# Object Transformation is of 2 types: Relational and structural
 class ObjectTransformation():
     
     def __init__(self, objectMap, transform=True):
@@ -71,7 +72,7 @@ class FigureTransformation():
         return string
 
     def __eq__(self, other):
-        for combination in util.pairs(self.getObjectNames(), other.getObjectNames()):
+        for combination in util.generic_pairs(self.getObjectNames(), other.getObjectNames()):
             match = True
             for pair in combination:
                 if self.get(pair[0]) != other.get(pair[1]):

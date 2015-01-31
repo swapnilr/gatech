@@ -2,8 +2,9 @@ class BetterRavensObject():
     def __init__(self, RO):
         self.RO = RO
         self.attributes = {}
-        for attr in RO.getAttributes():
-            self.attributes[attr.getName()] = attr.getValue()
+        if RO:
+            for attr in RO.getAttributes():
+                self.attributes[attr.getName()] = attr.getValue()
 
     def __eq__(self, other):
         return self.attributes == other.getAttributes()
@@ -30,4 +31,4 @@ class BetterRavensObject():
         return self.attributes
 
     def getName(self):
-        return self.RO.getName()
+        return self.RO.getName() if self.RO else None
