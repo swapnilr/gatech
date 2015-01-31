@@ -1,6 +1,22 @@
 from BetterRavensObject import BetterRavensObject
 import util
 
+class AttributeTransformation():
+    
+    def __init__(self, key, initial_value, final_value):
+        self.key = key
+        self.initial_value = initial_value
+        self.final_value = final_value
+
+    def __eq__(self, other):
+        return self.key == other.key and self.initial_value == other.initial_value and self.final_value == other.final_value
+
+    def __ne__(self, other):
+        return not self == other
+
+    def __str__(self):
+        return "(%s, %s)" %(initial_value, final_value)
+
 # Object Transformation is of 2 types: Relational and structural
 class ObjectTransformation():
     
@@ -11,14 +27,13 @@ class ObjectTransformation():
         if self.transform:
             self.transformations = {}
             for key, value in self.object0:
-                #transformation = value
                 if key in self.object1:
                     transformation = self.object1[key]
                     if value != transformation:
-                        self.transformations[key] = (value, transformation)
+                        self.transformations[key] = AttributeTransformation(key, value, transformation)
             for key, value in self.object1:
                 if key not in self.object0:
-                    self.transformations[key] = (None, value)
+                    self.transformations[key] = AttributeTransformation(key, None, value)
 
     def __str__(self):
         string = "Object 1 - %s\nObject 2 - %s" % (

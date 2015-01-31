@@ -25,11 +25,11 @@ class ObjectTransformationTest(unittest.TestCase):
     def testGetTransformations(self):
         transformations = self.otf.getTransformations()
         assert('shape' in transformations)
-        assert(transformations['shape'][0] == 'circle')
-        assert(transformations['shape'][1] == 'square')
+        assert(transformations['shape'].initial_value == 'circle')
+        assert(transformations['shape'].final_value == 'square')
         assert('size' in transformations)
-        assert(transformations['size'][0] == 'large')
-        assert(transformations['size'][1] == 'small')
+        assert(transformations['size'].initial_value == 'large')
+        assert(transformations['size'].final_value == 'small')
 
     def testEquals(self):
         ARO = RavensObject('A')
