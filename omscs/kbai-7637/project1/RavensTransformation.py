@@ -1,5 +1,6 @@
 from BetterRavensObject import BetterRavensObject
 import util
+import Shape
 
 class AttributeTransformation(object):
     
@@ -76,7 +77,13 @@ class OrientationTransformation(AttributeTransformation):
     
     def __init__(self, key, initial_value, final_value, shape):
         super(OrientationTransformation, self).__init__(key, initial_value, final_value)
-        self.shape = shape
+        self.shape = Shape.getShape(shape, initial_value, final_value)
+
+    def __eq__(self, other):
+        bothVerticallyReflected = (self.shape.isVerticallyReflected() and other.shape.isVerticallyReflected())
+        bothHorizontallyReflected = (self.shape.isHorizontallyReflected() and other.shape.isHorizontallyReflected())
+        sameRotationAngle = (self.shape.getRotationAngle() == other.shape.getRotationAngle())
+        return bothVerticallyReflected or bothHorizontallyReflected or sameRotationAngle
 
 
 # Object Transformation is of 2 types: Relational and structural
@@ -92,7 +99,7 @@ class ObjectTransformation():
                 if key in self.object1:
                     transformation = self.object1[key]
                     if key == 'angle':
-                        self.transformations[key] = OrientationTransformation(key, value, transformation, shape=self.object0['shape'])
+                        self.transformations[key] = OrientationTransformation(key, int(value), int(transformation), shape=self.object0['shape'])
                     elif value != transformation: # Add special case for orientation
                         self.transformations[key] = self.getTransformation(key, value, transformation)
             for key, value in self.object1:
