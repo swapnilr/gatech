@@ -53,7 +53,25 @@ class Circle(Shape):
 
 
 class Triangle(Shape):
-    pass
+
+    def bottomReflection(self, angle):
+        return (angle + self.halfRotation) % self.completeRotation
+
+    def sideReflection(self, angle):
+        return (angle) % self.completeRotation
+
+    def isVerticallyReflected(self):
+        if self.initial_angle % self.halfRotation == 90:
+            return self.getEquivalentRotationAngle(self.final_angle) == self.bottomReflection(self.initial_angle)
+        elif self.initial_angle % self.halfRotation == 0:
+            return self.getEquivalentRotationAngle(self.final_angle) == self.sideReflection(self.initial_angle)
+
+    def isHorizontallyReflected(self):
+        if self.initial_angle % self.halfRotation == 0:
+            return self.getEquivalentRotationAngle(self.final_angle) == self.bottomReflection(self.initial_angle)
+        elif self.initial_angle % self.halfRotation == 90:
+            return self.getEquivalentRotationAngle(self.final_angle) == self.sideReflection(self.initial_angle)
+        #return self.getRotationAngle() % self.halfRotation == 0 and not self.isVerticallyReflected()
 
 class Plus(Shape):
 
