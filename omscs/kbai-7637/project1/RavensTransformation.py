@@ -83,7 +83,13 @@ class LocationTransformation(AttributeTransformation):
 
     def finalize(self, combination, other_ftf):
         combination.update({None:None})
-        final_values = set(map(other_ftf.getNameTranslation, self.final_value))
+        reverse_map = {}
+        #Test
+        for name in self.parent.getObjectNames():
+            reverse_map[self.parent.getNameTranslation(name)] = name
+        func = lambda x: other_ftf.getNameTranslation(reverse_map[x])
+        #End Test
+        final_values = set(map(func, self.final_value)) #other_ftf.getNameTranslation, self.final_value))
         #print self.final_value, final_values, combination
         try:
             initial_values = set(map(combination.get, self.initial_value))
@@ -98,6 +104,9 @@ class LocationTransformation(AttributeTransformation):
         self.mapped_final_value = final_values
 
     def __eq__(self, other):
+        #print self.key == other.key
+        #print self.mapped_initial_value == other.initial_value
+        #print self.mapped_final_value, self.mapped_final_value == other.final_value
         return self.key == other.key and self.mapped_initial_value == other.initial_value and self.mapped_final_value == other.final_value
 
 class OrientationTransformation(AttributeTransformation):
@@ -224,8 +233,14 @@ class FigureTransformation():
         for combination in util.generic_pairs(self.getObjectNames(), other.getObjectNames()):
             match = True
             self.finalize(dict(combination), other)
+           # print "Trying Combination " + str(combination)
             for pair in combination:
                 if self.get(pair[0]) != other.get(pair[1]):
+                    #print "These 2 don't match: "
+                    #print "---------------------"
+                    #print self.get(pair[0])
+                    #print "---------------------"
+                    #print other.get(pair[1])
                     match = False
                     break
             if match:

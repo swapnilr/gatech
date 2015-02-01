@@ -25,12 +25,13 @@ class Agent2x1():
             for testName in ["1", "2", "3", "4", "5", "6"]:
                 testFigure = figures.get(testName)
                 for CD_ftf in common.mappings(C.getObjects(), testFigure.getObjects(), repeats=repeat):
-                    #ab_trans = AB_ftf.getNameTranslation('Y') == 'Y' and AB_ftf.getNameTranslation('X') == 'X' and AB_ftf.getNameTranslation('Z') == 'Z'
-                    #cd_trans = CD_ftf.getNameTranslation('Z') == 'X' and CD_ftf.getNameTranslation('Y') == 'Z' and CD_ftf.getNameTranslation('X') == 'Y'
-                    #if testName == "1" and ab_trans and cd_trans:
-                    #    print "Trying %s" % testName
-                    #    print "AB %s" % AB_ftf
-                    #    print "CD %s" %CD_ftf
+                    #ab_trans = AB_ftf.getNameTranslation('Z') == 'Y' and AB_ftf.getNameTranslation('X') == 'X' and AB_ftf.getNameTranslation('Y') == 'Z'
+                    #cd_trans = CD_ftf.getNameTranslation('Z') == 'Y' and CD_ftf.getNameTranslation('Y') == 'Z' and CD_ftf.getNameTranslation('X') == 'X'
+                    #if testName == "2" and ab_trans and cd_trans:
+                    #  print "----------------------------------------------------------------"
+                    #  print "Trying %s" % testName
+                    #  print "AB %s" % AB_ftf
+                    #  print "CD %s" %CD_ftf
                     if AB_ftf == CD_ftf:
                         answer = problem.checkAnswer(testName)
                         if answer != testName:
@@ -39,6 +40,8 @@ class Agent2x1():
                             print AB_ftf
                             print CD_ftf
                         return testName
+                    #if testName == "2" and ab_trans and cd_trans:
+                    #    print "----------------------------------------------------------------"
         print "Name - %s, Answer - %s, Couldn't Guess!!" % (
             problem.getName(), problem.checkAnswer(""))
         return ""
