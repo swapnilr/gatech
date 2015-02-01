@@ -55,7 +55,7 @@ def mappings(x, y, getTransformations=True):
         ftf = FigureTransformation()
         for objectMap in mapping:
             name = objectMap[0].getName()
-            otf = ObjectTransformation(objectMap, transform=getTransformations)
+            otf = ObjectTransformation(objectMap, ftf, transform=getTransformations)
             ftf.add(name, otf)
         yield ftf
 

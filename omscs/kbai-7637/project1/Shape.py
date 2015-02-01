@@ -12,7 +12,7 @@ def getShape(shape, initial_angle, final_angle, flips=(False, False)):
         return Rectangle(initial_angle, final_angle)
     elif shape == 'half-arrow':
         return HalfArrow(initial_angle, final_angle)
-    elif shape == 'Pac-man':
+    elif shape == 'Pac-Man':
         return PacMan(initial_angle, final_angle)
     else:
         return Shape(initial_angle, final_angle)
