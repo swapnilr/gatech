@@ -84,13 +84,11 @@ class LocationTransformation(AttributeTransformation):
     def finalize(self, combination, other_ftf):
         combination.update({None:None})
         reverse_map = {}
-        #Test
+        #TODO: This is not robust to deletion. Fix
         for name in self.parent.getObjectNames():
             reverse_map[self.parent.getNameTranslation(name)] = name
         func = lambda x: other_ftf.getNameTranslation(reverse_map[x])
-        #End Test
-        final_values = set(map(func, self.final_value)) #other_ftf.getNameTranslation, self.final_value))
-        #print self.final_value, final_values, combination
+        final_values = set(map(func, self.final_value))
         try:
             initial_values = set(map(combination.get, self.initial_value))
         except Exception as e:
