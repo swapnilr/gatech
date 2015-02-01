@@ -87,7 +87,11 @@ class LocationTransformation(AttributeTransformation):
         #TODO: This is not robust to deletion. Fix
         for name in self.parent.getObjectNames():
             reverse_map[self.parent.getNameTranslation(name)] = name
-        func = lambda x: other_ftf.getNameTranslation(reverse_map[x])
+        def func(x):
+            try:
+                return other_ftf.getNameTranslation(reverse_map[x])
+            except KeyError as k:
+                return x
         final_values = set(map(func, self.final_value))
         try:
             initial_values = set(map(combination.get, self.initial_value))

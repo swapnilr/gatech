@@ -1,4 +1,5 @@
 import common
+import random
 
 class Agent2x1():
 
@@ -7,6 +8,7 @@ class Agent2x1():
         A = figures.get("A")
         B = figures.get("B")
         C = figures.get("C")
+        choices = ["1", "2", "3", "4", "5", "6"]
         # Pseudocode:
         # generate mapping between A and B - Object to object mapping(G&T)
         #   get transformations required for that object to object mapping(MEA)
@@ -22,7 +24,7 @@ class Agent2x1():
         print problem.getName()
         for repeat in [True, False]:
           for AB_ftf in common.mappings(A.getObjects(), B.getObjects(), repeats=repeat):
-            for testName in ["1", "2", "3", "4", "5", "6"]:
+            for testName in choices:
                 testFigure = figures.get(testName)
                 for CD_ftf in common.mappings(C.getObjects(), testFigure.getObjects(), repeats=repeat):
                     #ab_trans = AB_ftf.getNameTranslation('Z') == 'Y' and AB_ftf.getNameTranslation('X') == 'X' and AB_ftf.getNameTranslation('Y') == 'Z'
@@ -34,14 +36,16 @@ class Agent2x1():
                     #  print "CD %s" %CD_ftf
                     if AB_ftf == CD_ftf:
                         answer = problem.checkAnswer(testName)
-                        if answer != testName:
-                            print "Name - %s, Answer - %s, Guess - %s" % (
-                                    problem.getName(), answer, testName)
-                            print AB_ftf
-                            print CD_ftf
+                        #if answer != testName:
+                        #    print "Name - %s, Answer - %s, Guess - %s" % (
+                        #            problem.getName(), answer, testName)
+                        #    print AB_ftf
+                        #    print CD_ftf
                         return testName
                     #if testName == "2" and ab_trans and cd_trans:
                     #    print "----------------------------------------------------------------"
-        print "Name - %s, Answer - %s, Couldn't Guess!!" % (
-            problem.getName(), problem.checkAnswer(""))
-        return ""
+        guess = random.choice(choices)
+        
+        #print "Name - %s, Answer - %s, Guess - %s" % (
+        #    problem.getName(), problem.checkAnswer(guess), guess)
+        return guess
