@@ -43,7 +43,7 @@ def writeAllowed(givenVerbosity):
 # Add Shapes and shape properties(such as rotating a circle is possible with it remaining the same)
 # Or invarianze to reflection. Also properties such as reflection/angle/orientation should have it's own
 # handler
-def mappings(x, y, getTransformations=True):
+def mappings(x, y, getTransformations=True, repeats=False):
     tempy = y
     if len(y) < len(x):
         tempy.extend([None]*(len(x) - len(y)))
@@ -55,7 +55,7 @@ def mappings(x, y, getTransformations=True):
         ftf = FigureTransformation()
         for objectMap in mapping:
             name = objectMap[0].getName()
-            otf = ObjectTransformation(objectMap, ftf, transform=getTransformations)
+            otf = ObjectTransformation(objectMap, ftf, transform=getTransformations, try_repeats=repeats)
             ftf.add(name, otf)
         yield ftf
 

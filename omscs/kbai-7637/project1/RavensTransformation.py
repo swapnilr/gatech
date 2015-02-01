@@ -117,7 +117,7 @@ class OrientationTransformation(AttributeTransformation):
 # Object Transformation is of 2 types: Relational and structural
 class ObjectTransformation():
     
-    def __init__(self, objectMap, parent=None, transform=True):
+    def __init__(self, objectMap, parent=None, transform=True, try_repeats=False):
         self.object0 = BetterRavensObject(objectMap[0])
         self.object1 = BetterRavensObject(objectMap[1])
         self.parent = parent
@@ -137,11 +137,13 @@ class ObjectTransformation():
                         self.transformations['orientation'] = OrientationTransformation(key, int(value), int(transformation), shape=self.object0['shape'], flips=(o0flip, o1flip))
                     elif key == 'vertical-flip':
                         pass
+                    elif (key == 'above' or key == 'inside' or key == 'left-of' or key == 'overlaps') and (try_repeats or value != transformation):
+                        self.transformations[key] = LocationTransformation(key, value, transformation, parent)
                     elif value != transformation: # Add special case for orientation
-                        if key == 'above' or key == 'inside' or key == 'left-of' or key == 'overlaps':
-                            self.transformations[key] = LocationTransformation(key, value, transformation, parent)
-                        else:
-                            self.transformations[key] = self.getTransformation(key, value, transformation)
+                        #if key == 'above' or key == 'inside' or key == 'left-of' or key == 'overlaps':
+                        #    self.transformations[key] = LocationTransformation(key, value, transformation, parent)
+                        #else:#if value != transformation:
+                        self.transformations[key] = self.getTransformation(key, value, transformation)
             for key, value in self.object1:
                 if key not in self.object0:
                     if key == 'above' or key == 'inside' or key == 'left-of' or key == 'overlaps':
