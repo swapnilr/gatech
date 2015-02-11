@@ -48,13 +48,41 @@ edges = cv2.Canny(smoothed, 100, 150, apertureSize=3)
 cv2.imwrite('output/ps1-3-b-2.png', edges)
 
 # 3-c - Find lines
-(H, theta, rho) = hough_lines_acc(edges);  # defined in hough_lines_acc.py
+(H, theta, rho) = hough_lines_acc(edges)
 H2 = (H * (255.0/H.max())).astype(np.uint8)
 rows, columns = H.shape
 accumulator = np.zeros((rows, columns, 3), dtype=np.uint8)
 accumulator[:,:,2] = H2
-cv2.imwrite('output/ps1-3-c-1.png', accumulator)
 peaks = hough_peaks(H, 10, Threshold=0.69*np.amax(H));
+for peak in peaks:
+    y,x = peak
+    cv2.circle(accumulator, (x,y), 10, cv.CV_RGB(255,0,0))
+cv2.imwrite('output/ps1-3-c-1.png', accumulator)
 hough_lines_draw(img, 'output/ps1-3-c-2.png', peaks, rho, theta)
 
+
+## Real Image
+
+# 4-a - Smoothing Image 
+img = cv2.imread('input/ps1-input1.png', 0)
+smoothed = cv2.GaussianBlur(img, (3,3), 1)
+cv2.imwrite('output/ps1-4-a-1.png', smoothed)
+
+# 4-b - Finding edges
+edges = cv2.Canny(smoothed, 100, 150, apertureSize = 3)
+cv2.imwrite('output/ps1-4-b-1.png', edges)
+
+# 4-c - Find lines
+(H, theta, rho) = hough_lines_acc(edges)
+H2 = (H * (255.0/H.max())).astype(np.uint8)
+rows, columns = H.shape
+accumulator = np.zeros((rows, columns, 3), dtype=np.uint8)
+accumulator[:,:,2] = H2
+size = np.floor(np.asarray(H.shape) / 150.0) * 2 + 1
+peaks = hough_peaks(H, 4, NHoodSize=size);
+for peak in peaks:
+    y,x = peak
+    cv2.circle(accumulator, (x,y), 10, cv.CV_RGB(255,0,0))
+cv2.imwrite('output/ps1-4-c-1.png', accumulator)
+hough_lines_draw(img, 'output/ps1-4-c-2.png', peaks, rho, theta)
 
