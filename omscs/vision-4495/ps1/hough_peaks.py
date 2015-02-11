@@ -8,8 +8,6 @@ def hough_peaks(H, numpeaks=1, Threshold=None, NHoodSize=None):
     if NHoodSize is None:
         NHoodSize = np.floor(np.asarray(H.shape) / 100.0) * 2 + 1
     H_copy = H.copy()
-    # TODO: Compute peaks: Qx2 array with row, col indices of peaks
-    # from i to number of peaks:
     peaks = []
     for i in range(numpeaks):
         peak_location = np.unravel_index(np.argmax(H_copy), H_copy.shape)
@@ -27,7 +25,7 @@ def hough_peaks(H, numpeaks=1, Threshold=None, NHoodSize=None):
     peaks = np.array(peaks)
     return peaks
 
-def hough_peaks2(H, numpeaks=1, Threshold=None, NHoodSize=None):
+def sorted_hough_peaks(H, Threshold=None):
     if Threshold is None:
         Threshold = 0.5 * np.amax(H)
     height, width = H.shape
@@ -40,9 +38,4 @@ def hough_peaks2(H, numpeaks=1, Threshold=None, NHoodSize=None):
             x_cond = (x < width - 1 and val > H[y][x+1]) and (x > 0 and val > H[y][x-1])
             if val > Threshold and y_cond and x_cond:
                 optima.put((-val, (y,x)))
-    optimaList = []
-    #for i in range(numpeaks):
-    #    if optima.empty():
-    #        break
-    #    optimaList.append(optima.get()[1])
-    return optimaList, optima
+    return optima

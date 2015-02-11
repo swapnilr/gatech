@@ -86,3 +86,29 @@ for peak in peaks:
 cv2.imwrite('output/ps1-4-c-1.png', accumulator)
 hough_lines_draw(img, 'output/ps1-4-c-2.png', peaks, rho, theta)
 
+## Circles
+
+# 5-a
+
+img = cv2.imread('input/ps1-input1.png', 0)
+smoothed = cv2.GaussianBlur(img, (3,3), 1)
+cv2.imwrite('output/ps1-5-a-1.png', smoothed)
+edges = cv2.Canny(smoothed, 75, 150)
+cv2.imwrite('output/ps1-5-a-2.png', edges)
+H = hough_circles_acc(img, 20)
+centers = hough_peaks(H, 10)
+rgbImage = cv2.cvtColor(img, cv.CV_GRAY2RGB)
+for center in centers:
+    y,x = center
+    cv2.circle(rgbImage, (x,y), 20, cv.CV_RGB(0,255,0))
+cv2.imwrite('output/ps1-5-a-3.png', rgbImage)
+
+# 5-b
+
+centers, radii = find_circles(img, range(20, 51), numCircles=14)
+rgbImage = cv2.cvtColor(img, cv.CV_GRAY2RGB)
+for i in range(len(centers)):
+    y,x = centers[i]
+    cv2.circle(rgbImage, (x,y), radii[i], cv.CV_RGB(0,255,0))
+cv2.imwrite('output/ps1-5b-1.png', rgbImage)
+
