@@ -7,6 +7,7 @@ from hough_lines_acc import hough_lines_acc
 from hough_lines_draw import hough_lines_draw
 import numpy as np
 import cv
+
 ## Simple Image
 
 # 1-a - Compute Edges
@@ -32,3 +33,28 @@ cv2.imwrite('output/ps1-2-b-1.png', accumulator)
 
 # 2-c - Draw lines
 hough_lines_draw(img, 'output/ps1-2-c-1.png', peaks, rho, theta)
+
+## Basic Noisy Image
+
+# 3-a - Smooth out Image 
+img = cv2.imread('input/ps1-input0-noise.png', cv2.IMREAD_UNCHANGED)
+smoothed = cv2.GaussianBlur(img, (7,7), 2)
+cv2.imwrite('output/ps1-3-a-1.png', smoothed)
+
+# 3-b - Find edges
+edges = cv2.Canny(img, 100, 150, apertureSize=3)
+cv2.imwrite('output/ps1-3-b-1.png', edges)
+edges = cv2.Canny(smoothed, 100, 150, apertureSize=3)
+cv2.imwrite('output/ps1-3-b-2.png', edges)
+
+# 3-c - Find lines
+(H, theta, rho) = hough_lines_acc(edges);  # defined in hough_lines_acc.py
+H2 = (H * (255.0/H.max())).astype(np.uint8)
+rows, columns = H.shape
+accumulator = np.zeros((rows, columns, 3), dtype=np.uint8)
+accumulator[:,:,2] = H2
+cv2.imwrite('output/ps1-3-c-1.png', accumulator)
+peaks = hough_peaks(H, 10, Threshold=0.69*np.amax(H));
+hough_lines_draw(img, 'output/ps1-3-c-2.png', peaks, rho, theta)
+
+
