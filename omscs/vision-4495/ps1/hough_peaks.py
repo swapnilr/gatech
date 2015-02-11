@@ -1,5 +1,6 @@
 import numpy as np
 import math
+from Queue import PriorityQueue
 
 def hough_peaks(H, numpeaks=1, Threshold=None, NHoodSize=None):
     if Threshold is None:
@@ -16,16 +17,37 @@ def hough_peaks(H, numpeaks=1, Threshold=None, NHoodSize=None):
         if peak < Threshold:
             break
         peaks.append(peak_location)
+        print peak_location
         min_row = max(peak_location[0] - int(NHoodSize[0]), 0)
         max_row = min(peak_location[0] + int(NHoodSize[0]) + 1, H.shape[0])
         min_col = max(peak_location[1] - int(NHoodSize[1]), 0)
         max_col = min(peak_location[1] + int(NHoodSize[1]) + 1, H.shape[1])
         for row in range(min_row, max_row):
             for col in range(min_col, max_col):
-                H_copy[row][col] = 0
+                H_copy[row, col] = 0
     #  find max
     #  if max < threshold: break
     #  add peak to peaks array
     #  0 everything around found peak in neighborhood
     peaks = np.array(peaks)  # placeholder
     return peaks
+
+def hough_peaks2(H, numpeaks=1, Threshold=None, NHoodSize=None):
+    if Threshold is None:
+        Threshold = 0.5 * np.amax(H)
+    height, width = H.shape
+    # Find local optima
+    optima = PriorityQueue()
+    for y in range(height):
+        for x in range(width):
+            val = H[y][x]
+            y_cond = (y < height - 1 and val > H[y+1][x]) and (y > 0 and val > H[y-1][x]) 
+            x_cond = (x < width - 1 and val > H[y][x+1]) and (x > 0 and val > H[y][x-1])
+            if val > Threshold and y_cond and x_cond:
+                optima.put((-val, (y,x)))
+    optimaList = []
+    #for i in range(numpeaks):
+    #    if optima.empty():
+    #        break
+    #    optimaList.append(optima.get()[1])
+    return optimaList, optima
