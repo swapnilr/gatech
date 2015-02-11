@@ -1,0 +1,39 @@
+2x1 Test Problem 11
+2x1
+2
+A
+	Z
+		shape:square
+		fill:no
+B
+	Z
+		shape:square
+		fill:top-right,bottom-right
+C
+	Z
+		shape:square
+		fill:bottom-left,bottom-right
+1
+	Z
+		shape:square
+		fill:top-left,bottom-left
+2
+	Z
+		shape:square
+		fill:top-right,bottom-right,bottom-left
+3
+	Z
+		shape:square
+		fill:no
+4
+	Z
+		shape:square
+		fill:top-left,top-right,bottom-left
+5
+	Z
+		shape:square
+		fill:yes
+6
+	Z
+		shape:square
+		fill:top-left,bottom-left,bottom-right

@@ -1,0 +1,53 @@
+2x1 Test Problem 18
+2x1
+4
+A
+	Z
+		shape:arrow
+		angle:0
+		fill:yes
+B
+	Z
+		shape:arrow
+		angle:180
+		fill:no
+C
+	Z
+		shape:half-arrow
+		angle:0
+		vertical-flip:no
+		fill:yes
+1
+	Z
+		shape:half-arrow
+		angle:0
+		vertical-flip:no
+		fill:no
+2
+	Z
+		shape:half-arrow
+		angle:0
+		vertical-flip:no
+		fill:yes
+3
+	Z
+		shape:half-arrow
+		angle:180
+		vertical-flip:yes
+		fill:yes
+4
+	Z
+		shape:half-arrow
+		angle:180
+		vertical-flip:yes
+		fill:no
+5
+	Z
+		shape:arrow
+		angle:0
+		fill:yes
+6
+	Z
+		shape:arrow
+		angle:180
+		fill:no

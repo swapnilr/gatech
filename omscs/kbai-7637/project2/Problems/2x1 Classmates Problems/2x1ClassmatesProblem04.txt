@@ -1,0 +1,112 @@
+2x1 Classmates' Problem 04
+2x1
+3
+A
+	X
+		shape:square
+		size:large
+		fill:no
+		angle:0
+B
+	Y
+		shape:square
+		size:large
+		fill:top-left,top-right,bottom-left
+		angle:0
+	X
+		shape:triangle
+		size:small
+		fill:no
+		inside:Y
+		angle:0
+C
+	X
+		shape:triangle
+		size:large
+		fill:no
+		angle:0
+1
+	X
+		shape:triangle
+		size:large
+		fill:top-left,top-right,bottom-left
+		angle:0
+2
+	Y
+		shape:square
+		size:small
+		fill:no
+		inside:X
+		angle:0
+	X
+		shape:triangle
+		size:large
+		fill:top-left,top-right,bottom-left
+		angle:0
+3
+	Y
+		shape:triangle
+		size:small
+		fill:no
+		inside:X
+		angle:0
+	X
+		shape:triangle
+		size:large
+		fill:top-left,top-right,bottom-left
+		angle:0
+4
+	Z
+		shape:triangle
+		size:medium
+		fill:no
+		inside:X
+		angle:0
+		overlaps:X
+	Y
+		shape:square
+		size:small
+		fill:no
+		inside:Z,X
+		angle:0
+	X
+		shape:triangle
+		size:large
+		fill:top-left,top-right,bottom-left,bottom-right
+		angle:0
+5
+	Z
+		shape:triangle
+		size:small
+		fill:no
+		inside:Y
+		angle:0
+	Y
+		shape:square
+		size:medium
+		fill:no
+		overlaps:X
+		angle:0
+	X
+		shape:triangle
+		size:large
+		fill:top-left,top-right,bottom-left,bottom-right
+		angle:0
+6
+	Z
+		shape:square
+		size:small
+		fill:no
+		inside:Y
+		angle:0
+	Y
+		shape:square
+		size:medium
+		fill:no
+		overlaps:X
+		angle:0
+	X
+		shape:triangle
+		size:large
+		fill:top-left,top-right,bottom-left,bottom-right
+		angle:0
