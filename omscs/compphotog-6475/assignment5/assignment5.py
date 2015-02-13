@@ -49,9 +49,14 @@ def imageGradientX(image):
         output (numpy.ndarray): The image gradient in the X direction.
     """
     # WRITE YOUR CODE HERE.
-
-
-
+    width, height = image.shape
+    output = np.zeros((width, height), dtype=np.uint8)
+    ifloat = image.astype(float)
+    for y in range(width):
+        for x in range(height):
+            x2 = min(x + 1, height - 1)
+            output[y, x] = np.uint8(abs(ifloat[y, x2] - ifloat[y, x]))
+    return output
     # END OF FUNCTION.
 
 def imageGradientY(image):
@@ -76,9 +81,14 @@ def imageGradientY(image):
         output (numpy.ndarray): The image gradient in the Y direction.
     """
     # WRITE YOUR CODE HERE.
-
-
-
+    width, height = image.shape
+    output = np.zeros((width, height), dtype=np.uint8)
+    ifloat = image.astype(float)
+    for y in range(width):
+        for x in range(height):
+            y2 = min(y + 1, width - 1)
+            output[y, x] = np.uint8(abs(ifloat[y2, x] - ifloat[y, x]))
+    return output
     # END OF FUNCTION.
 
 def computeGradient(image, kernel):
@@ -104,7 +114,18 @@ def computeGradient(image, kernel):
         output (numpy.ndarray): The computed gradient for the input image.
     """
     # WRITE YOUR CODE HERE.
-
-
-
+    width, height = image.shape
+    output = np.zeros((width, height), dtype=np.uint8)
+    ifloat = image.astype(float)
+    kfloat = kernel.astype(float)
+    k = 1
+    for y in range(1, width - 1):
+        for x in range(1, height - 1):
+            # Cross-correlate
+            val = 0.0
+            for v in range(-k, k+1):
+                for u in range(-k, k+1):
+                    val += kfloat[v+1,u+1] * ifloat[y + v, x + u]
+            output[y, x] = np.uint8(val)
+    return output
     # END OF FUNCTION.
