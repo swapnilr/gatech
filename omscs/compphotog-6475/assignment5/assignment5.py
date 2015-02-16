@@ -1,5 +1,6 @@
 # ASSIGNMENT 5
-# Your Name
+# Swapnil Ralhan
+# GTID - 903049849
 
 import cv2
 import numpy as np
@@ -125,7 +126,7 @@ def computeGradient(image, kernel):
             val = 0.0
             for v in range(-k, k+1):
                 for u in range(-k, k+1):
-                    val += kfloat[v+1,u+1] * ifloat[y + v, x + u]
+                    val += kfloat[v+k,u+k] * ifloat[y + v, x + u]
             output[y, x] = np.uint8(val)
     return output
     # END OF FUNCTION.

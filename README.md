@@ -4,6 +4,7 @@ Georgia Tech OMS CS
 Spring 2014
 -----------
 [CS 6210 Advanced Operating Systems](https://github.com/swapnilr/gatech/tree/master/omscs/os-6210)
+
 CS 6250 Computer Networking
 
 Summer 2014
