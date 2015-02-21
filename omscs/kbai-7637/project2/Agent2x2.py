@@ -1,4 +1,6 @@
 from RavensTransformation import RavensTransformation
+import random
+
 class Agent2x2():
 
     def __init__(self):
@@ -10,7 +12,7 @@ class Agent2x2():
         #     3. A map from weight to a set of object transformations that have that weight
         self._transformations_ = {}
 
-    def __generateOTFs__(self, figure1, figure2):
+    def __generateTransformations__(self, figure1, figure2):
         """Create a RavensTransformation with these 2 figures and to the transformation map"""
         # Take care about how to generate OTFs when you map to "deletion", or multimap or addition
         # If len(figure1) == len(figure2):
@@ -27,13 +29,13 @@ class Agent2x2():
         A = figures.get("A")
         B = figures.get("B")
         C = figures.get("C")
-        self._generateOTFs__(A, B)
-        self._generateOTFs__(A, C)
+        self.__generateTransformations__(A, B)
+        self.__generateTransformations__(A, C)
         choices = ["1", "2", "3", "4", "5", "6"]
         for choice in choices:
             option = figures.get(choice)
-            self.__generateOTFs__(B, option)
-            self.__generateOTFs__(C, option)
+            self.__generateTransformations__(B, option)
+            self.__generateTransformations__(C, option)
         
         # 1. Get "Lightest" A-B Transformation - (OTF0, .. OTFn)
         # 2. Given the weights of the each OTF (w0, ... wn), where n = max(no of figures in A|B)
@@ -44,4 +46,21 @@ class Agent2x2():
         #     iii. Of remaining possibilities, evaluate to get "viable" one. If viable one exists, we're done.
         #     iv. (Optional) Evaluate similarly in A-C, B-[1..6]. This can either be used as a tie breaker, a
         #          verifier or an extra hypothesis generator if we are left to guess.
-        return "5"
+        candidateRTs = map(lambda choice: self._transformations_["C-%s" % choice], choices)
+
+        for ftf in self._transformations_["A-B"]:
+            for candidateRT in candidateRTs:
+               otfOptions = {}
+               for otf in ftf:
+                   options = candidateRT.getOTFsByWeight(otf.getWeight())
+                   otfOptions[otf] = filter(lambda x: otf == x, options)
+               # Evaluate Viable combinations
+               # TODO: Make more intelligent
+               valid = True
+               for otf, options in ftf.iteritems():
+                   if len(options) == 0:
+                       valid = False
+                       break
+               if valid:
+                   return candidateRT.goal.getName()
+        return random.choice(choices)

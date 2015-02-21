@@ -4,6 +4,7 @@
 #     3. A map from weight to a set of object transformations that have that weight
 from Queue import PriorityQueue
 from ObjectTransformation import ObjectTransformation
+import itertools
 
 class RavensTransformation():
     """Class Representing all possible figure transformations.
@@ -23,15 +24,17 @@ class RavensTransformation():
     def __init__(self, source, goal):
         self.source = source
         self.goal = goal
-        self.nameToOTF = {}
+        #self.nameToOTF = {}
         self.weightToOTFs = {}
         self.sourceObjToOTFs = {}
         self.ftfs = PriorityQueue()
         for sourceObj in source.getObjects():
             for goalObj in goal.getObjects():
+                sourceBRO = BetterRavensObject(sourceObj, source)
+                goalBRO = BetterRavensObject(goalObj, goal)
                 # Generate ObjectTransformation
-                otf = ObjectTransformation(sourceObj, goalObj)
-                self.nameToOTF[otf.getName()] = otf
+                otf = ObjectTransformation(sourceBRO, goalBRO)
+                #self.nameToOTF[otf.getName()] = otf
                 if otf.getWeight() in self.weightToOTFs:
                     self.weightToOTFs[otf.getWeight()].append(otf)
                 else:
@@ -43,3 +46,31 @@ class RavensTransformation():
         # Generate all possible otf combinations and add to priority queue
         # self.ftfs.put((ftf.getWeight(), ftf))
         # Start with brute force combination, later maybe have better error checking
+        # TODO: Take into accounts weights for deletion, multimapping here
+        def allOptions(listOfLists):
+            if(len(listOfLists) == 1:
+                return [[item] for item in listOfLists[0]]
+            car = listOfLists[0]
+            cdr = listOfLists[1:]
+            ret = []
+            for el in car:
+                for el2 in cdr:
+                    ret.append(el2 + [el])
+            return ret
+        
+        listOfOTFLists = []
+        for mappedOTFs in self.sourceObjToOTFs.itervalues():
+            listOfOTFLists.append(mappedOTFs)
+
+
+        for otfList in allOptions(listOfOTFLists):
+            ftf = FigureTransformation(otfList)
+            self.ftfs.put((ftf.getWeight(), ftf))
+
+    def __iter__(self):
+        return self
+
+    def next(self):
+        if self.ftfs.empty():
+            raise StopIteration()
+        return self.ftfs.get()
