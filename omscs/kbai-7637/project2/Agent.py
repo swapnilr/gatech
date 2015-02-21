@@ -7,14 +7,20 @@
 # def Solve(self,problem)
 #
 # These methods will be necessary for the project's main method to run.
+from Agent2x1 import Agent2x1
+from InteractiveAgent import InteractiveAgent
+from Agent2x2 import Agent2x2
 class Agent:
     # The default constructor for your Agent. Make sure to execute any
     # processing necessary before your Agent starts solving problems here.
     #
     # Do not add any variables to this signature; they will not be used by
     # main().
-    def __init__(self):
-        pass
+    def __init__(self, interactive=False):
+        if interactive:
+            self.agent = InteractiveAgent()
+        else:
+            self.agent = Agent2x1()
 
     # The primary method for solving incoming Raven's Progressive Matrices.
     # For each problem, your Agent's Solve() method will be called. At the
@@ -40,4 +46,9 @@ class Agent:
     # @param problem the RavensProblem your agent should solve
     # @return your Agent's answer to this problem
     def Solve(self,problem):
-        return "6"
+        agent = Agent2x2()
+        if problem.getProblemType() == '2x1':
+            return '5'
+        if problem.getProblemType() == '2x2':
+            return agent.Solve(problem)
+        return self.agent.Solve(problem)
