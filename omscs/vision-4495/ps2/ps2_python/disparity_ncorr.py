@@ -28,5 +28,4 @@ def disparity_ncorr(L, R):
         for x in range(columns):
             if D[y,x] + x > columns:
                 D[y,x] = D[y,x] - columns
-    print D.shape
     return D
