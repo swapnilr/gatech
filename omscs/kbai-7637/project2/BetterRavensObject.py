@@ -1,7 +1,6 @@
 class BetterRavensObject():
-    def __init__(self, RO, parent):
+    def __init__(self, RO):
         self.RO = RO
-        self.parent = parent
         self.attributes = {}
         if RO:
             for attr in RO.getAttributes():
@@ -33,6 +32,3 @@ class BetterRavensObject():
 
     def getName(self):
         return self.RO.getName() if self.RO else None
-
-    def getFullName(self):
-        return "%s-%s" %(self.parent.getName(), self.RO.getName())

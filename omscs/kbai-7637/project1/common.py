@@ -7,6 +7,7 @@ from RavensTransformation import ObjectTransformation
 from RavensTransformation import FigureTransformation
 import itertools
 import util
+from Queue import PriorityQueue
 
 # Clean up verbosity and pretty printing
 
@@ -51,6 +52,7 @@ def mappings(x, y, getTransformations=True, repeats=False):
     if len(x) < len(y):
         mappings = util.extended_pairs(x, y)
         # Mappings defined as follows: Given x=[1], y=[1,2], we want
+    queue = PriorityQueue()
     for mapping in mappings:
         ftf = FigureTransformation()
         for objectMap in mapping:
@@ -58,6 +60,9 @@ def mappings(x, y, getTransformations=True, repeats=False):
             otf = ObjectTransformation(objectMap, ftf, transform=getTransformations, try_repeats=repeats)
             ftf.add(name, otf)
         yield ftf
+    #    queue.put((ftf.getWeight(), ftf))
+    #while not queue.empty():
+    #    yield queue.get()[1]
 
 
 class bcolors():

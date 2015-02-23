@@ -24,9 +24,6 @@ def extended_pairs(x, y):
     for possibility in extra_possibilities:
         tempx = x + list(possibility)
         extras.extend(pairs(tempx, y))
-    tempx = x
-    tempx.extend([None]*(len(y) - len(x)))
-    extras.extend(pairs(tempx, y))
     return extras
 
 def generic_pairs(x,y):

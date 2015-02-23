@@ -14,12 +14,6 @@ def getShape(shape, initial_angle, final_angle, flips=(False, False)):
         return HalfArrow(initial_angle, final_angle)
     elif shape == 'Pac-Man':
         return PacMan(initial_angle, final_angle)
-    elif shape == 'octagon':
-        return Polygon(initial_angle, final_angle, 8)
-    elif shape == 'pentagon':
-        return Polygon(initial_angle, final_angle, 5)
-    elif shape == 'hexagon':
-        return Polygon(initial_angle, final_angle, 6)
     else:
         return Shape(initial_angle, final_angle)
 
@@ -83,12 +77,6 @@ class Plus(Shape):
 
     def __init__(self, initial_angle, final_angle, complete_rotation=90, half_rotation=90):
         super(Plus, self).__init__(initial_angle, final_angle, complete_rotation, half_rotation)
-
-class Polygon(Shape):
-
-    def __init__(self, initial_angle, final_angle, sides):
-        super(Polygon, self).__init__(initial_angle, final_angle, 360/sides, 360/sides)
-        self.sides = sides
 
 class Rectangle(Shape):
 

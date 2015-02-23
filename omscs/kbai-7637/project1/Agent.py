@@ -45,5 +45,7 @@ class Agent:
     # @return your Agent's answer to this problem
     def Solve(self,problem):
         if problem.getProblemType() == '2x1':
-           self.agent.Solve(problem)
+           return self.agent.Solve(problem)
+        if problem.getProblemType() == '2x2':
+           return self.agent.Solve(problem)
         return "5"

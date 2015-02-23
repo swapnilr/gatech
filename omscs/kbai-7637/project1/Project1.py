@@ -21,7 +21,7 @@ import common
 # project will be graded using our own version of this file.
 def main():
     parser = argparse.ArgumentParser(description='Filters for what problems to solve')
-    parser.add_argument('--problem_sets', type=str, choices=['Basic','Challenge', 'Classmates'], nargs='*')
+    parser.add_argument('--problem_sets', type=str, choices=['Basic','Challenge', 'Classmates', 'Unordered', 'Test'], nargs='*')
     parser.add_argument('--problems', type=int, nargs='*')
     args = parser.parse_args()
     sets=[] # The variable 'sets' stores multiple problem sets.

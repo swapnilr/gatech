@@ -46,6 +46,6 @@ class Agent2x1():
                     #    print "----------------------------------------------------------------"
         guess = random.choice(choices)
         
-        #print "Name - %s, Answer - %s, Guess - %s" % (
+        print "Guessing! Name - %s" % problem.getName()
         #    problem.getName(), problem.checkAnswer(guess), guess)
         return guess

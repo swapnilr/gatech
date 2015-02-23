@@ -51,20 +51,12 @@ def mappings(x, y, getTransformations=True, repeats=False):
     mappings = util.pairs(x, tempy)
     if len(x) < len(y):
         mappings = util.extended_pairs(x, y)
-        #tempx = x
-        #tempx.extend([None]*(len(y) - len(x)))
-        #mappings.extend(util.pairs(tempx, y))
         # Mappings defined as follows: Given x=[1], y=[1,2], we want
     queue = PriorityQueue()
     for mapping in mappings:
         ftf = FigureTransformation()
         for objectMap in mapping:
-            num = 0
-            if objectMap[0]:
-                name = objectMap[0].getName()
-            else:
-                name = "None%d" % num
-                num += 1
+            name = objectMap[0].getName()
             otf = ObjectTransformation(objectMap, ftf, transform=getTransformations, try_repeats=repeats)
             ftf.add(name, otf)
         yield ftf

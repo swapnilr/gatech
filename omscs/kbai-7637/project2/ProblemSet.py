@@ -99,3 +99,10 @@ class ProblemSet:
             return False
     def getNextLine(self, r):
         return r.readline().rstrip()
+
+    def getTotalCorrect(self):
+        numRight=0;
+        for problem in self.problems:
+            if problem.getCorrect()=="Correct":
+                numRight+=1
+        return numRight

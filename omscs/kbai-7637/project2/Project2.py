@@ -42,7 +42,7 @@ def main():
             newSet.addProblem(f)
 
     # Initializing problem-solving agent from Agent.java
-    agent=Agent(args.interactive)   # Your agent will be initialized with its default constructor.
+    agent=Agent()   # Your agent will be initialized with its default constructor.
                     # You may modify the default constructor in Agent.java
 
     # Running agent against each problem set

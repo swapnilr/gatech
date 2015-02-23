@@ -1,0 +1,115 @@
+2x1 Test Problem 08
+2x1
+3
+A
+	Z
+		shape:square
+		size:large
+	Y
+		shape:square
+		size:medium
+		inside:Z
+	X
+		shape:square
+		size:small
+		inside:Z,Y
+B
+	Z
+		shape:square
+		size:large
+	Y
+		shape:square
+		size:medium
+		above:Z
+		left-of:X
+	X
+		shape:square
+		size:small
+		above:Z
+C
+	Z
+		shape:circle
+		size:large
+	Y
+		shape:circle
+		size:medium
+		inside:Z
+	X
+		shape:circle
+		size:small
+		inside:Z,Y
+1
+	Z
+		shape:square
+		size:large
+	Y
+		shape:square
+		size:medium
+		above:Z
+		left-of:X
+	X
+		shape:square
+		size:small
+		above:Z
+2
+	Z
+		shape:circle
+		size:large
+	Y
+		shape:circle
+		size:medium
+		inside:Z
+	X
+		shape:circle
+		size:small
+		above:Z,Y
+3
+	Z
+		shape:circle
+		size:medium
+		above:X
+		left-of:Y
+	Y
+		shape:circle
+		size:small
+		above:X
+	X
+		shape:circle
+		size:large
+4
+	Z
+		shape:circle
+		size:large
+	Y
+		shape:circle
+		size:medium
+		inside:Z
+	X
+		shape:circle
+		size:small
+		inside:Z,Y
+5
+	Z
+		shape:circle
+		size:medium
+		above:Y,X
+	Y
+		shape:circle
+		size:large
+	X
+		shape:circle
+		size:small
+		inside:Y
+6
+	Z
+		shape:circle
+		size:medium
+		above:X
+	Y
+		shape:circle
+		size:small
+		inside:Z
+		above:X
+	X
+		shape:circle
+		size:large
