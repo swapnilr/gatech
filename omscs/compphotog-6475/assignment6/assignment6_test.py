@@ -79,7 +79,7 @@ def run_blend(black_image, white_image, mask):
   return lapl_pyr_black, lapl_pyr_white, gauss_pyr_black, gauss_pyr_white, \
       gauss_pyr_mask, outpyr, outimg
 
-def test_reduce_expand():
+def est_reduce_expand():
   """This script will perform a unit test on the first two functions.
   """
   # Each subsequent layer is a reduction of the previous one
