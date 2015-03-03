@@ -2,6 +2,8 @@ import numpy as np
 import cv2
 import time
 import cv
+import math
+import random
 PIC_A = "pic_a.jpg"
 PIC_A_2D = "pts2d-pic_a.txt"
 PIC_A_2D_NORM = "pts2d-norm-pic_a.txt"
@@ -11,8 +13,10 @@ SCENE = "pts3d.txt"
 SCENE_NORM = "pts3d-norm.txt"
 
 def main():
+    part1_calibration()
+    part2_matrix()
     #testLeastSquares()
-    testMatrixEst()
+    #testMatrixEst()
     #print readFile("input/" + PIC_A_2D)
 
 def readFile(filename):
@@ -117,34 +121,95 @@ def svd22(twoD, twoD2):
     #print v
     return v[-1]    
 
-def testLeastSquares():
+def part1_calibration():
+    # Part A
+    print "Part 1"
+    print "======"
+    print "Part A"
+    print "------"
     twoD = readFile("input/" + PIC_A_2D_NORM)
     threeD = readFile("input/" + SCENE_NORM)
-    #print twoD
-    #print threeD
     M = leastSquares(twoD, threeD)[0]
     div = M[0,0]/(-0.4583)
-    print M/div
-    print 1/div
+    M_norm = M/div # last value is 1/div
     M2 =  svd(twoD, threeD)
     div = M2[0]/(-0.4583)
-    print M2/div
+    M_norm = M2/div
+    print "Matrix M"
+    print M2.reshape((3,4))
+    print "Normalized Matrix"
+    print M_norm.reshape((3,4))
     d = np.zeros((4,1))
     d[0:3, 0] = threeD[-1]
     d[3] = 1
-    #np.resize(M, (12,1))
-    #M[11, 0] = 1
-    #print M
     M = M2.reshape((3,4))
     pt2d = np.dot(M, d)
-    print pt2d/pt2d[-1]
-    Q = M[:, 0:3]
-    m4 = M[:, 3]
+    pt2d_norm = pt2d/pt2d[-1]
+    print "Normalized point"
+    print np.transpose(pt2d_norm[:2,])
+
+    def getResidual(index, M):
+        d = np.zeros((4,1))
+        d[0:3, 0] = threeD[index]
+        d[3] = 1
+        pt2d = np.dot(M, d)
+        pt2d_norm = pt2d/pt2d[-1]
+        def residual(pt1, pt2):
+            rows, columns = pt1.shape
+            res = 0
+            for r in range(rows):
+                res += (pt1[r,0] - pt2[r])**2
+            return math.sqrt(res)
+        return residual(pt2d[:2,], twoD[index])
+
+    print "Residual"
+    print getResidual(-1, M2.reshape((3,4)))
+    print
+
+    # Part B
+    print "Part B"
+    print "------"
+    min_residual = float('inf') #max infinitiy
+    bestM = None
+    for size in [8, 12, 16]:
+        for trial in range(10):
+            indices = range(20)
+            random.shuffle(indices)
+            points = indices[:size]
+            to_delete = indices[size:]
+            test_sample = indices[16:]
+            test_to_delete = indices[:16]
+            smallTwoD = np.delete(twoD, to_delete, 0)
+            smallThreeD = np.delete(threeD, to_delete, 0)
+            smallM = svd(smallTwoD, smallThreeD).reshape((3,4))
+            average_residual = 0
+            for index in test_sample:
+                average_residual += getResidual(index, smallM)
+            average_residual /= 4
+            if average_residual < min_residual:
+                min_residual = average_residual
+                bestM = smallM
+    print "Best Matrix"
+    print bestM
+    print "Min residual"
+    print min_residual
+    print
+
+    # Part C
+    print "Part C"
+    print "------"
+    print "Camera location with best M"
+    Q = bestM[:, 0:3]
+    m4 = bestM[:, 3]
     C = np.dot((-(np.linalg.inv(Q))),  m4)
     print C
+    print
 
-def testMatrixEst():
-    print "-----Fundamental Matrix Esimation-----"
+def part2_matrix():
+    print "Part 2 - Fundamental Matrix Esimation"
+    print "======"
+    print "Part A"
+    print "------"
     twoD = readFile("input/" + PIC_A_2D)
     twoD2 = readFile("input/" + PIC_B_2D)
     def getF(img1, img2):
@@ -158,21 +223,47 @@ def testMatrixEst():
         Sp = np.zeros((3,3))
         Sp[:3, :3] = np.diag(sp)
         F = np.dot(np.dot(U, Sp), V)
-        return F
-    F = getF(twoD, twoD2)
-    F2 = getF(twoD2, twoD)
-    
+        return F_tilda, F
+    F_tilda, F = getF(twoD, twoD2)
+    print "F_tilda"
+    print F_tilda
+    print 
+    print "Part B"
+    print "------"
+    print "F"
+    print F
+    print
+
+    print "Part C"
+    print "------"
+    points, irr = twoD.shape
+
+    def draw(img_name, points, F):
+        img = cv2.imread("input/" + img_name)
+        rows, columns, rgb = img.shape
+        for point in points:
+            p = np.zeros((3,1))
+            p[2, 0] = 1
+            p[0:2, 0] = np.transpose(point)
+            lp = np.dot(F, p)
+            def solve(x):
+                return  (-lp[2] - (lp[0]*x))/lp[1] # ax + by + c = 0 => y = -c/b - (ax/b)
+            cv2.line(img,(0,solve(0)),(columns,solve(columns)),cv.CV_RGB(0,255,0))
+        return img
+    imgA = draw(PIC_A, twoD2, np.transpose(F))
+    imgB = draw(PIC_B, twoD, F)
+    print "Writing Files"
+    cv2.imwrite("output/ps3-2-c-1.png", imgA)
+    cv2.imwrite("output/ps3-2-c-2.png", imgB)
+
     def getHeterogeneous(points):
         ptsSize, dim = points.shape
         newPoints = np.zeros((ptsSize, dim + 1))
         newPoints[:,:2] = points
         newPoints[:,2] = 1
         return newPoints
-    #print twoD
-    #print np.transpose(getHeterogeneous(twoD))
 
     def scale(points):
-        #print points.shape
         mean = np.mean(points, 0)
         cu = mean[0]
         cv = mean[1]
@@ -189,47 +280,30 @@ def testMatrixEst():
         r[1,2] = -cv
         T = np.dot(l, r)
         scaled = np.dot(T, np.transpose(getHeterogeneous(points)))
-        #return T
         return T, np.transpose(scaled)
+    print "Part D"
+    print "------"
     Ta, scaledD = scale(twoD)
     Tb, scaledD2 = scale(twoD2)
-    F_cap =  getF(scaledD, scaledD2)
-    F2_cap = getF(scaledD2, scaledD)
+    F_cap =  getF(scaledD, scaledD2)[1]
+    print "Ta"
+    print Ta
+    print "Tb"
+    print Tb
+    print "F_hat"
+    print F_cap
+
+    print
+    print "Part E"
+    print "------"
     F = np.dot(np.dot(np.transpose(Tb), F_cap), Ta)
-    F2 = np.dot(np.dot(np.transpose(Ta), F2_cap), Tb)
-
-
-    points, irr = twoD.shape
-
-    for pt in range(points):
-        p = np.zeros((3,1))
-        point = twoD[pt, :]
-        p[2, 0] = 1
-        p[0:2, 0] = np.transpose(point)
-        p2 = np.zeros((1,3))
-        point = twoD2[pt, :]
-        p2[0, 2] = 1
-        p2[0, 0:2] = point
-        #print "ft", np.dot(p2, np.dot(F_tilda, p))
-    #    #print lc/lc[0][-1], rc/rc[0][-1]
-        print np.dot(p2, np.dot(F, p))
-    def draw(img_name, points, F):
-        img = cv2.imread("input/" + img_name)
-        rows, columns, rgb = img.shape
-        for point in points:
-            p = np.zeros((3,1))
-            p[2, 0] = 1
-            p[0:2, 0] = np.transpose(point)
-            lp = np.dot(F, p)
-            def solve(x):
-                return  (-lp[2] - (lp[0]*x))/lp[1] # ax + by + c = 0 => y = -c/b - (ax/b)
-            cv2.line(img,(0,solve(0)),(columns,solve(columns)),cv.CV_RGB(0,255,0))
-        return img
+    print "F"
+    print F
+    print "Writing images"
     imgA = draw(PIC_A, twoD2, np.transpose(F))
     imgB = draw(PIC_B, twoD, F)
-    cv2.imshow("a", imgA)
-    cv2.imshow("b", imgB)
-    time.sleep(30)
+    cv2.imwrite("output/ps3-2-e-1.png", imgA)
+    cv2.imwrite("output/ps3-2-e-2.png", imgB)
 
 if __name__ == '__main__':
     main()
