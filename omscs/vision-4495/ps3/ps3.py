@@ -225,7 +225,7 @@ def testMatrixEst():
                 return  (-lp[2] - (lp[0]*x))/lp[1] # ax + by + c = 0 => y = -c/b - (ax/b)
             cv2.line(img,(0,solve(0)),(columns,solve(columns)),cv.CV_RGB(0,255,0))
         return img
-    imgA = draw(PIC_A, twoD2, F2)
+    imgA = draw(PIC_A, twoD2, np.transpose(F))
     imgB = draw(PIC_B, twoD, F)
     cv2.imshow("a", imgA)
     cv2.imshow("b", imgB)
