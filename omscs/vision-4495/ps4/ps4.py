@@ -2,6 +2,7 @@ import cv2
 import numpy as np
 from scipy import signal
 import cv
+import math
 
 # Harris Corners
 KERNEL_SIZE = 5
@@ -119,7 +120,7 @@ def get_points(hv, threshold, radius):
         if valid[y, x] == 1:
             final_indices.append((y, x))
             valid[ y-radius: y+radius, x-radius:x+radius] = 0
-    print len(final_indices)
+    #print len(final_indices)
     return final_indices
 
 
@@ -152,15 +153,88 @@ def q1():
     q1b()
     q1c()
 
+# SIFT Features
+SIZE = 3
+
+def getKeyPoints(image, threshold=0.8, radius=10):
+    gradX, gradY = computeGradient(image)
+    angle = np.degrees(np.arctan2(gradY, gradX))
+    hv = harrisValue(image)
+    points = get_points(scale(hv), threshold=threshold, radius=radius)
+    keyPoints = []
+    for pt in points:
+        point = cv2.KeyPoint(x=pt[1], y=pt[0], _size=radius, _angle=angle[pt], _octave=0)
+        keyPoints.append(point)
+    return keyPoints
+
+def drawKeyPoints(image1, image2, output_fn, threshold=0.8, radius=10):
+    points = getKeyPoints(image1, threshold, radius)
+    colored1 = cv2.cvtColor(upscale(image1), cv2.COLOR_GRAY2RGB)
+    image1 = cv2.drawKeypoints(colored1, points, flags=cv2.DRAW_MATCHES_FLAGS_DRAW_RICH_KEYPOINTS)
+    points = getKeyPoints(image2, threshold, radius)
+    colored2 = cv2.cvtColor(upscale(image2), cv2.COLOR_GRAY2RGB)
+    image2 = cv2.drawKeypoints(colored2, points, flags=cv2.DRAW_MATCHES_FLAGS_DRAW_RICH_KEYPOINTS)
+    final = np.concatenate((image1, image2), axis=1)
+    cv2.imwrite(output_fn, final)
+
+def readScaled(input_fn):
+    im = cv2.imread(input_fn, cv2.IMREAD_GRAYSCALE).astype(np.float_)
+    # Scale the image to [0.0, 1.0]
+    im /= 255.0
+    return im
+
+def q2a():
+    drawKeyPoints(readScaled('input/transA.jpg'), 
+                  readScaled('input/transB.jpg'), 'output/ps4-2-a-1.png',
+                  threshold=0.85)
+    drawKeyPoints(readScaled('input/simA.jpg'), 
+                  readScaled('input/simB.jpg'), 'output/ps4-2-a-2.png',
+                  threshold=0.78)
+
+
+
+def drawPair(image1, image2, output_fn, threshold=0.8, radius=10):
+    sift = cv2.SIFT()
+
+    points1 = getKeyPoints(image1, threshold, radius)
+    points1, descriptors1 = sift.compute(upscale(image1), points1)
+    
+    points2 = getKeyPoints(image2, threshold, radius)
+    points2, descriptors2 = sift.compute(upscale(image2), points2)
+
+    bfm = cv2.BFMatcher()
+    matches = bfm.match(descriptors1, descriptors2)
+
+    colored1 = cv2.cvtColor(upscale(image1), cv2.COLOR_GRAY2RGB)
+    colored2 = cv2.cvtColor(upscale(image2), cv2.COLOR_GRAY2RGB)
+    final = np.concatenate((colored1, colored2), axis=1)
+
+    rows, columns, dim = colored1.shape
+
+
+    for dmatch in matches:
+        point1 = points1[dmatch.queryIdx].pt
+        point2 = points2[dmatch.trainIdx].pt
+        cv2.line(final, (int(point1[0]), int(point1[1])), (int(point2[0]) + columns, int(point2[1])), cv.CV_RGB(0,255,0))
+    cv2.imwrite(output_fn, final)
+
+def q2b():
+    drawPair(readScaled('input/transA.jpg'),
+                  readScaled('input/transB.jpg'), 'output/ps4-2-b-1.png',
+                  threshold=0.85)
+    drawPair(readScaled('input/simA.jpg'),
+                  readScaled('input/simB.jpg'), 'output/ps4-2-b-2.png',
+                  threshold=0.78)
 
 def q2():
-    pass
+    q2a()
+    q2b()
 
 def q3():
     pass
 
 def main():
-    q1()
+    #q1()
     q2()
     q3()
 
