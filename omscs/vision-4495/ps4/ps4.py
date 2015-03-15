@@ -3,6 +3,7 @@ import numpy as np
 from scipy import signal
 import cv
 import math
+import random
 
 # Harris Corners
 KERNEL_SIZE = 5
@@ -192,8 +193,7 @@ def q2a():
                   threshold=0.78)
 
 
-
-def drawPair(image1, image2, output_fn, threshold=0.8, radius=10):
+def getMatches(image1, image2, threshold=0.8, radius=10):
     sift = cv2.SIFT()
 
     points1 = getKeyPoints(image1, threshold, radius)
@@ -205,6 +205,11 @@ def drawPair(image1, image2, output_fn, threshold=0.8, radius=10):
     bfm = cv2.BFMatcher()
     matches = bfm.match(descriptors1, descriptors2)
 
+    return points1, points2, matches
+
+def drawPair(image1, image2, output_fn, threshold=0.8, radius=10):
+
+    points1, points2, matches = getMatches(image1, image2, threshold, radius)
     colored1 = cv2.cvtColor(upscale(image1), cv2.COLOR_GRAY2RGB)
     colored2 = cv2.cvtColor(upscale(image2), cv2.COLOR_GRAY2RGB)
     final = np.concatenate((colored1, colored2), axis=1)
@@ -230,12 +235,153 @@ def q2():
     q2a()
     q2b()
 
+def tupleToArray(tup):
+    temp = np.asarray(tup)
+    temp[0] = tup[1]
+    temp[1] = tup[0]
+    return temp
+
+def q3a(threshold=25, N=100):
+    transA = readScaled('input/transA.jpg')
+    transB = readScaled('input/transB.jpg')
+    points1, points2, matches = getMatches(transA, transB, 0.85)
+    points = []
+    rows, columns = transA.shape
+    oldPts = []
+    threshold = threshold**2
+    for trial in range(N):
+        guess = random.sample(matches, 1)[0]
+        point1 = tupleToArray(points1[guess.queryIdx].pt)
+        point2 = tupleToArray(points2[guess.trainIdx].pt)
+        translation = point2 - point1
+        oldPts = points
+        points = []
+        for match in matches:
+            point1 = tupleToArray(points1[match.queryIdx].pt)
+            point2 = tupleToArray(points2[match.trainIdx].pt)
+            point2Guess = translation + point1
+            ssd = np.sum((point2Guess - point2)**2)
+            if ssd < threshold:
+                points.append(match)
+        
+        if len(points) < len(oldPts):
+            points = oldPts
+
+    print len(points), len(matches)
+   
+ 
+    output_fn = 'output/ps4-3-a-1.png'
+    colored1 = cv2.cvtColor(upscale(transA), cv2.COLOR_GRAY2RGB)
+    colored2 = cv2.cvtColor(upscale(transB), cv2.COLOR_GRAY2RGB)
+    final = np.concatenate((colored1, colored2), axis=1)
+    rows, columns, dim = colored1.shape
+    for dmatch in points:
+        point1 = points1[dmatch.queryIdx].pt
+        point2 = points2[dmatch.trainIdx].pt
+        cv2.line(final, (int(point1[0]), int(point1[1])), (int(point2[0]) + columns, int(point2[1])), cv.CV_RGB(0,255,0))
+    cv2.imwrite(output_fn, final)
+
+def getHomogeneous(pt):
+    ret = np.ones((3,1))
+    ret[0,0] = pt[1]
+    ret[1,0] = pt[0]
+    return ret
+
+def q3b(threshold=25, N=100):
+    simA = readScaled('input/simA.jpg')
+    simB = readScaled('input/simB.jpg')
+    points1, points2, matches = getMatches(simA, simB, 0.78)
+    points = []
+    oldPts = []
+    threshold = threshold**2
+    for trial in range(N):
+        guesses = random.sample(matches, 2)
+        
+        guess0 = guesses[0]
+        point0_1 = tupleToArray(points1[guess0.queryIdx].pt)
+        v_0 = point0_1[0]
+        u_0 = point0_1[1]
+        point0_2 = tupleToArray(points2[guess0.trainIdx].pt)
+        vp_0 = point0_2[0]
+        up_0 = point0_2[0]
+
+        guess1 = guesses[1]
+        point1_1 = tupleToArray(points1[guess1.queryIdx].pt)
+        v_1 = point1_1[0]
+        u_1 = point1_1[1]
+        point1_2 = tupleToArray(points2[guess1.trainIdx].pt)
+        vp_1 = point1_2[0]
+        up_1 = point1_2[1]
+
+        A = np.zeros((4,4))
+        A[0,0] = u_0
+        A[0,1] = -v_0
+        A[0,2] = 1
+        A[1,0] = v_0
+        A[1,1] = u_0
+        A[1,3] = 1
+        A[2,0] = u_1
+        A[2,1] = -v_1
+        A[2,2] = 1
+        A[3,0] = v_1
+        A[3,1] = u_1
+        A[3,3] = 1
+
+        b = np.zeros((4,1))
+        b[0,0] = up_0
+        b[1,0] = vp_0
+        b[2,0] = up_1
+        b[3,0] = vp_1
+        x = np.linalg.lstsq(A,b)
+        a = x[0][0][0]
+        b = x[0][1][0]
+        c = x[0][2][0]
+        d = x[0][3][0]
+        #print x[0].shape, a,b,c,d
+        translation = np.zeros((2,3))
+        translation[0,0] = a
+        translation[0,1] = -b
+        translation[0,2] = c
+        translation[1,0] = b
+        translation[1,1] = a
+        translation[1,2] = d
+
+        oldPts = points
+        points = []
+        for match in matches:
+            point1 = getHomogeneous(tupleToArray(points1[match.queryIdx].pt))
+            point2 = getHomogeneous(tupleToArray(points2[match.trainIdx].pt))
+            point2Guess = np.dot(translation, point1)
+            ssd = np.sum((point2Guess - point2[:2,])**2)
+            if ssd < threshold:
+                points.append(match)
+        
+        if len(points) < len(oldPts):
+            points = oldPts
+
+    print len(points), len(matches)
+   
+ 
+    output_fn = 'output/ps4-3-b-1.png'
+    colored1 = cv2.cvtColor(upscale(simA), cv2.COLOR_GRAY2RGB)
+    colored2 = cv2.cvtColor(upscale(simB), cv2.COLOR_GRAY2RGB)
+    final = np.concatenate((colored1, colored2), axis=1)
+    rows, columns, dim = colored1.shape
+    for dmatch in points:
+        point1 = points1[dmatch.queryIdx].pt
+        point2 = points2[dmatch.trainIdx].pt
+        cv2.line(final, (int(point1[0]), int(point1[1])), (int(point2[0]) + columns, int(point2[1])), cv.CV_RGB(0,255,0))
+    cv2.imwrite(output_fn, final)
+
+
+
 def q3():
-    pass
+    q3a()
+    q3b()
 
 def main():
     #q1()
-    q2()
+    #q2()
     q3()
 
 if __name__ == '__main__':
