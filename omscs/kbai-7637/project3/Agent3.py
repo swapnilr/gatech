@@ -7,6 +7,10 @@
 # def Solve(self,problem)
 #
 # These methods will be necessary for the project's main method to run.
+import features
+import cv2
+import numpy as np
+
 class Agent3:
     # The default constructor for your Agent. Make sure to execute any
     # processing necessary before your Agent starts solving problems here.
@@ -40,4 +44,17 @@ class Agent3:
     # @param problem the RavensProblem your agent should solve
     # @return your Agent's answer to this problem
     def Solve(self,problem):
-        return "6"
+        figures = problem.getFigures()
+        A = cv2.imread(figures["A"].fullpath).astype(np.int32)
+        B = cv2.imread(figures["B"].fullpath).astype(np.int32)
+        C = cv2.imread(figures["C"].fullpath).astype(np.int32)
+        best_guess = float("inf")
+        answer = ""
+        for guess in map(str, range(1,7)):
+            trial = cv2.imread(figures[guess].fullpath).astype(np.int32)
+            gsf = features.sumFeature(A, B, C, trial)
+            val = gsf.value()
+            if val < best_guess:
+                best_guess = val
+                answer = guess
+        return answer
