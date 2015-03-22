@@ -7,8 +7,12 @@
 # def Solve(self,problem)
 #
 # These methods will be necessary for the project's main method to run.
+import os
+import subprocess
+
 import Agent1
 import Agent2
+import Agent3
 
 class Agent:
     # The default constructor for your Agent. Make sure to execute any
@@ -19,6 +23,7 @@ class Agent:
     def __init__(self):
         self.agent1 = Agent1.Agent1()
         self.agent2 = Agent2.Agent2()
+        self.agent3 = Agent3.Agent3()
 
     # The primary method for solving incoming Raven's Progressive Matrices.
     # For each problem, your Agent's Solve() method will be called. At the
@@ -44,11 +49,37 @@ class Agent:
     # @param problem the RavensProblem your agent should solve
     # @return your Agent's answer to this problem
     def Solve(self,problem):
-        #sol1 = self.agent1.Solve(problem)
-        for i in [0.9, 0.8, 0.7]:
-            sol2 = self.agent2.Solve(problem, i)
-            if sol2:
-                print "%s: %s at %f" % (problem.getName(), sol2, i)
-                return sol2
-        print "%s: Guessing" % problem.getName()
-        return "6"
+        sol = None
+        try:
+            sol = self.agent1.Solve(problem)
+            agent = 1
+        except Exception as e:
+            pass
+        if not sol:
+            for i in [0.9, 0.8]:
+                try:
+                    sol = self.agent2.Solve(problem, i)
+                    agent = 2
+                except Exception as e:
+                    pass
+                if sol:
+                    break
+            if not sol:
+                try:
+                    sol = self.agent3.Solve(problem)
+                    agent = 3
+                except Exception as e:
+                    pass
+        ans = problem.checkAnswer(sol)
+        # Add case based learning
+        if ans != sol:
+            existingTemplates = os.listdir("templates")
+            nextNum = len(existingTemplates)
+            figures = problem.getFigures()
+            subprocess.call(['mkdir', 'templates%stemplate%d' % (os.sep, nextNum) ])
+            subprocess.call(['cp', figures["A"].fullpath, 'templates%stemplate%d%sA.png' % (os.sep, nextNum, os.sep)])
+            subprocess.call(['cp', figures["B"].fullpath, 'templates%stemplate%d%sB.png' % (os.sep, nextNum, os.sep)])
+            subprocess.call(['cp', figures["C"].fullpath, 'templates%stemplate%d%sC.png' % (os.sep, nextNum, os.sep)])
+            subprocess.call(['cp', figures[ans].fullpath, 'templates%stemplate%d%sans.png' % (os.sep, nextNum, os.sep)])
+        print "%s: %s using agent %d" % (problem.getName(), sol, agent)
+        return sol

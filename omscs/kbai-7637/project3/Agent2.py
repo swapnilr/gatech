@@ -10,6 +10,7 @@
 import cv2
 from skimage.measure import structural_similarity as ssim
 from Queue import PriorityQueue as PQ
+import os
 
 THRESHOLD = 0.8
 
@@ -21,8 +22,11 @@ class Agent2:
     # main().
     def __init__(self):
         self.d = {}
-        for i in range(40):
-            self.d[i] = cv2.imread('templates/template%d/A.png' % i, cv2.CV_LOAD_IMAGE_GRAYSCALE)
+        for template in os.listdir("templates"):
+            self.dir_prefix = "templates" + os.sep + template + os.sep 
+            filename = self.dir_prefix + "A.png"
+            i = int(template[8:])
+            self.d[i] = cv2.imread(filename, cv2.CV_LOAD_IMAGE_GRAYSCALE)
 
     # The primary method for solving incoming Raven's Progressive Matrices.
     # For each problem, your Agent's Solve() method will be called. At the
@@ -62,9 +66,9 @@ class Agent2:
         for i in range(5):
             val, ind = pq_A.get()
             if -val > threshold:
-                B_g = cv2.imread('templates/template%d/B.png' % ind, cv2.CV_LOAD_IMAGE_GRAYSCALE)
-                C_g = cv2.imread('templates/template%d/C.png' % ind, cv2.CV_LOAD_IMAGE_GRAYSCALE)
-                ans_g = cv2.imread('templates/template%d/ans.png' % ind, cv2.CV_LOAD_IMAGE_GRAYSCALE)
+                B_g = cv2.imread('templates%stemplate%d%sB.png' % (os.sep, ind, os.sep), cv2.CV_LOAD_IMAGE_GRAYSCALE)
+                C_g = cv2.imread('templates%stemplate%d%sC.png' % (os.sep, ind, os.sep), cv2.CV_LOAD_IMAGE_GRAYSCALE)
+                ans_g = cv2.imread('templates%stemplate%d%sans.png' % (os.sep, ind, os.sep), cv2.CV_LOAD_IMAGE_GRAYSCALE)
                 B_val = ssim(B_g, B)
                 if B_val < threshold:
                     continue

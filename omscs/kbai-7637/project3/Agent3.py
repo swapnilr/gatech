@@ -10,6 +10,8 @@
 import features
 import cv2
 import numpy as np
+from scipy import signal
+from Queue import PriorityQueue as PQ
 
 class Agent3:
     # The default constructor for your Agent. Make sure to execute any
@@ -45,16 +47,57 @@ class Agent3:
     # @return your Agent's answer to this problem
     def Solve(self,problem):
         figures = problem.getFigures()
-        A = cv2.imread(figures["A"].fullpath).astype(np.int32)
-        B = cv2.imread(figures["B"].fullpath).astype(np.int32)
-        C = cv2.imread(figures["C"].fullpath).astype(np.int32)
+        A = cv2.imread(figures["A"].fullpath, cv2.CV_LOAD_IMAGE_GRAYSCALE).astype(np.int32)
+        B = cv2.imread(figures["B"].fullpath, cv2.CV_LOAD_IMAGE_GRAYSCALE).astype(np.int32)
+        C = cv2.imread(figures["C"].fullpath, cv2.CV_LOAD_IMAGE_GRAYSCALE).astype(np.int32)
         best_guess = float("inf")
         answer = ""
+        #corr = signal.correlate2d(A, B)
+        #corr = signal.fftconvolve(A, B)
+        sumpq = PQ()
+        diffpq = PQ()
+        ssimpq = PQ()
+        mulpq = PQ()
+        trapzpq = PQ()
+        ssdpq = PQ()
+
+        # Generate values for ALL of the guesses, then with [1,2,3,4], use the ratio 1:2  to 1:4 to guess how
+        # confident you are in the guess, use the confidence as weight
         for guess in map(str, range(1,7)):
-            trial = cv2.imread(figures[guess].fullpath).astype(np.int32)
-            gsf = features.sumFeature(A, B, C, trial)
-            val = gsf.value()
-            if val < best_guess:
-                best_guess = val
+            trial = cv2.imread(figures[guess].fullpath, cv2.CV_LOAD_IMAGE_GRAYSCALE).astype(np.int32)
+            sumpq.put((features.sumFeature(A, B, C, trial).value(), guess))
+            diffpq.put((features.diffFeature(A, B, C, trial).value(), guess))
+            ssimpq.put((features.ssimFeature(A, B, C, trial).value(), guess))
+            #sumpq.put((features.corrFeature(A, B, C, trial, corr)
+            mulpq.put((features.mulFeature(A, B, C, trial).value(), guess))
+            trapzpq.put((features.trapzFeature(A, B, C, trial).value(), guess))
+            ssdpq.put((features.ssdFeature(A, B, C, trial).value(), guess))
+            #print trial, gsf
+            #val = gsf#.value()
+            #if val < best_guess:
+            #    best_guess = val
+            #    answer = guess
+        weightMap = {0:1.0, 1:0.8, 2:0.6, 3:0.4, 4:0.2,5:0.1}
+        totalPQ = []
+        FEATURES = 6
+        for i in range(FEATURES):
+            totalPQ.append(PQ())
+        for i in range(6):
+            totalPQ[0].put((-weightMap[i], sumpq.get()[1]))
+            totalPQ[1].put((-weightMap[i], diffpq.get()[1]))
+            totalPQ[2].put((-weightMap[i], ssimpq.get()[1]))
+            totalPQ[3].put((-weightMap[i], mulpq.get()[1]))
+            totalPQ[4].put((-weightMap[i], trapzpq.get()[1]))
+            totalPQ[5].put((-weightMap[i], ssdpq.get()[1]))
+        finalVal = {'1':0,'2':0,'3':0,'4':0,'5':0,'6':0}
+        for i in range(6):
+            for j in range(FEATURES):
+                v, guess = totalPQ[j].get()
+                finalVal[guess] += -v
+        val=0
+        answer = ""
+        for guess in map(str, range(1,7)):
+            if val < finalVal[guess]:
                 answer = guess
+                val = finalVal[guess]
         return answer
