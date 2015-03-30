@@ -1,6 +1,6 @@
 import cv2
 import numpy as np
-THRESHOLD = 500 
+THRESHOLD = 100 
 BLUR_SIZE = 5
 FILTER_SIZE = 17
 def lk_flow(image1, image2):
@@ -45,7 +45,7 @@ def lk_flow(image1, image2):
             b[1,0] = -Iyt[y,x]
             w,v = np.linalg.eig(A)
             #print w
-            if w[0]/w[1] > THRESHOLD or w[1]/w[0] > THRESHOLD:
+            if w[0] == 0 or w[1] == 0 or w[0]/w[1] > THRESHOLD or w[1]/w[0] > THRESHOLD:
                 U[y,x] = 0
                 V[y,x] = 0
             
