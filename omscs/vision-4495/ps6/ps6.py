@@ -26,6 +26,9 @@ def getTextFile(filename):
 def getFilename(index=0):
     return 'input/%s' % FILES[index]
 
+def upscale(image):
+    return (image * 255).astype(np.uint8)
+
 class Filter():
 
     def __init__(self, image, template):
@@ -71,11 +74,15 @@ def MSESensorModel(image, template, particle):
     #print particle
     v = particle[0] - height/2
     u = particle[1] - width/2
-    for y in range(height):
-        for x in range(width):
-            #print template[y,x], image[y+v, x+u]
-            MSE += (template[y,x] - image[y+v, x+u])**2
-    MSE = MSE/(height*width)
+    #print particle, height, width, v, u 
+    patch = image[v:v+height,u:u+width]
+    #print template.shape, patch.shape
+    MSE = ((template - patch)**2).mean()
+    #for y in range(height):
+    #    for x in range(width):
+    #        #print template[y,x], image[y+v, x+u]
+    #        MSE += (template[y,x] - image[y+v, x+u])**2
+    #MSE = MSE/(height*width)
     #print MSE
     return math.exp(-MSE/(2 * (SIGMA_MSE ** 2)))
 
@@ -91,24 +98,32 @@ def q1():
     particles = []
     size = int(math.ceil(math.sqrt(NUM_PARTICLES)))
     rows, columns = frame.shape
-    ys = np.linspace(int(model.h/2), rows-int(model.h/2), size, endpoint=False)
-    xs = np.linspace(int(model.w/2), columns-int(model.w/2), size, endpoint=False)
+    ys = np.linspace(int(model.h/2) + 1, rows-int(model.h/2) - 1, size, endpoint=False)
+    xs = np.linspace(int(model.w/2) + 1, columns-int(model.w/2) - 1, size, endpoint=False)
     for y in ys:
         for x in xs:
             particles.append(np.array((y,x)))
 
     while debate.isOpened():
         ret, frame = debate.read()
-        frame = (cv2.cvtColor(frame, cv2.COLOR_RGB2GRAY)).astype(np.float)
         if not ret:
             print "ret is False at index %d" % index
             break
+        frame = (cv2.cvtColor(frame, cv2.COLOR_RGB2GRAY)).astype(np.float)
         f = Filter(frame, template)
         f.setDynamicsModel(gaussNoiseDynamicsModel)
         f.setSensorModel(MSESensorModel)
         particles = f.compute(particles)
+        if index == 28 or index == 84 or index == 144:
+            frame = cv2.cvtColor(upscale(frame), cv2.COLOR_GRAY2RGB)
+            for particle in particles:
+                pt = (int(particle[1]), int(particle[0]))
+                cv2.circle(frame, pt, 1, (0, 0, 255))
+            cv2.imshow("%d" % index, frame)
+            import time
+            time.sleep(5)
         index += 1
-        print index
+        #print index
 
 def main():
     q1()
