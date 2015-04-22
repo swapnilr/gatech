@@ -13,7 +13,7 @@ def getFilename(action_number, person_number, trial_number):
                                        trial_number)
 
 def getMHI(action_number, person_number, trial_number):
-    print action_number, person_number, trial_number
+    #print action_number, person_number, trial_number
     return cv2.imread("input/MHI/action%d/person%d/MHI%d.png" % (action_number, 
                                                              person_number, 
                                                              trial_number), 
@@ -62,12 +62,24 @@ def upscale(img):
     img = img/np.max(img)
     return (img * 255).astype(np.uint8)
 
+def getIndexArrays(img):
+    rows, columns = img.shape
+    x = np.zeros(img.shape)
+    y = np.zeros(img.shape)
+    x_ind = np.arange(columns).reshape((1, columns))
+    x[:,:] = x_ind
+    y_ind = np.arange(rows).reshape((rows, 1))
+    y[:,:] = y_ind
+    return x, y
+
 def moment(img, i, j):
     rows, columns = img.shape
     mom = 0.0
-    for y in range(rows):
-        for x in range(columns):
-            mom += (x ** i) * (y ** j) * img[y,x]
+    x, y = getIndexArrays(img)
+    mom = np.sum((x ** i) * (y ** j) * img)
+    #for y in range(rows):
+    #    for x in range(columns):
+    #        mom += (x ** i) * (y ** j) * img[y,x]
     return mom
 
 def central_moments(img, p, q):
@@ -79,9 +91,11 @@ def central_moments(img, p, q):
     mu = 0.0
     img = img.astype(np.float)
     rows, columns = img.shape
-    for y in range(rows):
-        for x in range(columns):
-            mu += ((x-avg_x)**p) * ((y-avg_y)**q) * img[y,x]
+    x, y = getIndexArrays(img)
+    mu = np.sum( ((x - avg_x) ** p) * ((y - avg_y) ** q) * img)
+    #for y in range(rows):
+    #    for x in range(columns):
+    #        mu += ((x-avg_x)**p) * ((y-avg_y)**q) * img[y,x]
     return mu
 
 def scale_invariant_moments(img, p, q, mu00):
@@ -98,7 +112,7 @@ def create_vector(img, desc, use_mu=False):
     global vector_hash
     if desc in vector_hash:
         return vector_hash[desc]
-    print "Creating vector for " + str(desc)
+    #print "Creating vector for " + str(desc)
     vector = np.zeros((1,14))
     i = 0
     for im in [img, threshold(img, THRESHOLD)]:
